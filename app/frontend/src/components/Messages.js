@@ -14,13 +14,12 @@ class Messages extends Component{
     messages: PropTypes.array.isRequired
   };
   render(){
+    
     return(
       !this.props.messages.length ? (
         <p>Nothing to show</p>
       ) : (
-        this.props.messages.map((message, index) => <Message key={index} data={message}/>)
-        
-    
+        this.props.messages.map((message, index) => <Message key={index} data={message}/>)   
     ));
   }
 }

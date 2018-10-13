@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import Channel from "./Channel";
 import './global.js';
-import { NavigationDrawer, FontIcon, MenuButton} from 'react-md';
+import { NavigationDrawer, FontIcon, Button} from 'react-md';
 
 class App extends Component{
     constructor(props){
@@ -15,7 +15,7 @@ class App extends Component{
             activeChannelId: null,
             lastChannelIndex: 1,
             isLoading: true,
-
+            channelAccess: false,
             navItems: [
                 {
                     key:"channels-header",
@@ -39,7 +39,9 @@ class App extends Component{
     createNavItem(prevState, data){
         let items = [];
         let lastChannelIndex = this.state.lastChannelIndex;
-
+        const activeListItemStyle = {
+            backgroundColor: '#673ab71c'
+        }
         for(var id in Object.entries(data)){
             let channel = data[id];
             let found = prevState.filter(obj => {
@@ -50,9 +52,10 @@ class App extends Component{
                 console.log(channel);
                 items.push({key: channel.channel_id,
                             active: this.state.activeChannelId === channel.channel_id,
+                            activeBoxStyle: activeListItemStyle,
                             leftIcon: <FontIcon key={channel.channel_id+"-icon"}>people</FontIcon>,
                             onClick: (e) => this.onSelectedChannel(e, channel.channel_id),
-                            primaryText: channel.channel_id
+                            primaryText: '# '+channel.channel_id
                 })
             }
             else {
@@ -81,8 +84,8 @@ class App extends Component{
         }
         navItems.splice(lastChannelIndex, 0, ...items);
         lastChannelIndex += items.length;
-        console.log(navItems);
-        console.log(lastChannelIndex);
+        // console.log(navItems);
+        // console.log(lastChannelIndex);
         return [navItems, lastChannelIndex];
     }
     fetchRooms(){
@@ -95,7 +98,7 @@ class App extends Component{
         })
         .then(data => {
             let items = this.createNavItem(this.state.channels, data);
-            console.log(items);
+            // console.log(items);
             this.setState(prevState => ({channels: data, navItems: items[0], lastChannelIndex: items[1], isLoading: false })); 
         });
     }
@@ -118,18 +121,25 @@ class App extends Component{
             channel.active = false;
         }
         if(selectedChannel){
-            if(selectedChannel.active){
+            if(selectedChannel.active)
                 change_socket(channel_id+'/');
-                this.setState({channelSelected: false});
-            }
             else
                 change_socket("");
 
-            this.setState(prevState => ({navItems: navItems, selectedChannelIndex: channel_index, activeChannelId: channel_id, channelSelected: selectedChannel.active}));
+            this.setState(prevState => ({navItems: navItems, selectedChannelIndex: channel_index, activeChannelId: channel_id, channelSelected: selectedChannel.active, channelAccess: prevState.selectedChannelIndex == index}));
+        }
+    }
+    onButtonClick(e, type){
+        if(type == 'Join'){
+            // Fetch api
+            this.setState({channelAccess: true});
+        }
+        else if(type == 'Leave'){
+            // Fetch
+            this.setState({channelAccess: false});
         }
     }
     componentDidMount() {
-        
         chat_socket.onopen = function(){
             console.log("Connected to chat socket: No room selected");
         }
@@ -146,30 +156,51 @@ class App extends Component{
         this.fetchRooms();
     }
     render() {
-        const {navItems, channelSelected, activeChannelId, isLoading} = this.state;
-
+        const {navItems, channelSelected, activeChannelId, isLoading, channelAccess} = this.state;
+        const divStyle = {
+            filter: 'blur(5px)',
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none'
+          };
+        const h3Style = {
+            top: '20%',
+            left: '50%',
+            zIndex: '1',
+            position: 'absolute',
+        };
+        const channelStyle = {
+            fontWeight: '300'
+        }
+        const toolbarStyle = {
+            marginTop: '0px'
+        }
         return (
             isLoading ? null : (
             <NavigationDrawer
               drawerId="main-navigation"
               drawerTitle="chat-app"
               toolbarId="main-toolbar"
-              toolbarTitle={channelSelected? activeChannelId : "Select a Channel"}
+              toolbarTitle={channelSelected? '# '+activeChannelId : "Select a Channel"}
+              toolbarTitleStyle={channelStyle}
               navItems={navItems}
-              toolbarActions={channelSelected ? (<MenuButton
-                id="menu-button-2"
-                icon
-                menuItems={['Item One', 'Item Two', 'Item Three', 'Item Four']}
-              >
-                more_vert
-              </MenuButton>) : null}
+              toolbarActions={channelSelected ? (channelAccess ? (<Button onClick={(e) => this.onButtonClick(e, "Leave")} flat primary swapTheming>Leave Channel</Button>) : (<Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>)) : null}
             >
-                               {channelSelected ? (<Channel key={activeChannelId} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />) : null}
+                               {channelSelected ? (
+                               channelAccess? (<Channel key={activeChannelId} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />)
+                               : (
+                                <div>
+                                    <h2 style={h3Style}>Join <i>{activeChannelId}</i> to view messages </h2>
+                                    <div style={divStyle}>
+                                        <Channel key={activeChannelId} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />
+                                    </div>
+                                </div>
+                               )) : null}
             </NavigationDrawer>
             )
             
           );
     }
 }
-const wrapper = document.getElementById("app");
+const wrapper = document.getElementById("default");
 wrapper ? ReactDOM.render(<App endpoint={window.location.href+'rooms'} />, wrapper) : null;

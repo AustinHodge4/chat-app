@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import './global.js';
 import Form from './Form';
 import Messages from "./Messages";
-import {Grid, Cell} from "react-md";
+import {Grid, Cell, Toolbar} from "react-md";
 
 
 class Channel extends Component {
@@ -16,9 +16,11 @@ class Channel extends Component {
       placeholder: "Loading...",
       page: 2,
       channel: props.channel,
+      channelAccess: props.channelAccess,
     }
   }
   static propTypes = {
+    channelAccess: PropTypes.bool.isRequired,
     channel: PropTypes.string.isRequired,
     endpoint: PropTypes.string.isRequired,
   };
@@ -45,11 +47,14 @@ class Channel extends Component {
     }
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
-      console.log("Message:")
-      console.log(message.message);
-      this.setState(prevState => ({
-        data: [...prevState.data, message.message]
-      }))
+      console.log(message);
+      if(message.type == 'message_event'){
+        console.log("Message:")
+        console.log(message.message);
+        this.setState(prevState => ({
+          data: [...prevState.data, message.message]
+        }))
+      }
     }.bind(this)
 
     fetch(this.props.endpoint+"1")
@@ -67,17 +72,31 @@ class Channel extends Component {
   }
 
   render() {
-    const { data, loaded, placeholder, channel } = this.state;
+    const { data, loaded, placeholder, channel, channelAccess } = this.state;
+    const scrollBox = {
+      overflowY: 'scroll',
+      maxHeight: '76vh',
+      height: '76vh'
+    }
+    const messageBox = {
+      top: 'auto',
+      bottom: '0',
+      height: '10%'
+    }
+    const FormArea = () => (
+      <Grid>
+        <Cell size={12}>
+        <Form disable={!channelAccess} callback={this.loadMoreMessages} channel={channel} />
+          </Cell>
+      </Grid>
+    )
     return (loaded) ? (    
       <div>    
         <Grid className="grid-example">
-          <Cell size={10} offset={1}><Messages messages={data} /></Cell>
-         <Cell size={10} offset={1}>
-        <Form callback={this.loadMoreMessages} />
-        </Cell>
+          <Cell size={12} style={scrollBox}><Messages messages={data} /></Cell>
         </Grid>
-      
-        </div>
+        <Toolbar fixed={true} style={messageBox} themed={true} children={<FormArea />} />
+      </div>
       ) : ( <p>{placeholder}</p>);
   }
 }
