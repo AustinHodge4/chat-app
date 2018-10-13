@@ -12,6 +12,15 @@ import json
 def index(request):
     return render(request, 'index.html')
 
+def login(request):
+    if request.method == 'POST':
+        # login user
+        username = request['username']
+        
+        return render(request, 'index.html')
+    else:
+        return render(request, 'login.html')
+
 class Rooms(APIView):
     renderer_classes = (JSONRenderer, )
 
@@ -34,7 +43,7 @@ class Messages(APIView):
         print("Created: {}".format(created))
         # We want to show the last 50 messages, ordered most-recent-last
         messages = Message.objects.filter(channel=channel).order_by('-timestamp').reverse()
-        paginator = Paginator(messages, 5)
+        paginator = Paginator(messages, 10)
         page =  (paginator.num_pages+1) - int(request.GET.get('page', 1))
         print(paginator.num_pages)
         print(page)

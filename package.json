@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development ./app/frontend/src/index.js --output ./app/frontend/static/frontend/main.js",
+    "login": "webpack --mode development ./app/frontend/src/login.js --output ./app/frontend/static/frontend/login.js",
     "build": "webpack --mode production ./app/frontend/src/index.js --output ./app/frontend/static/frontend/main.js"
   },
   "keywords": [],
@@ -23,9 +24,7 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "@material-ui/core": "^3.1.2",
     "react-md": "^1.7.1",
-    "react-timestamp": "^4.4.0",
-    "react-websocket": "^2.0.0"
+    "react-timestamp": "^4.4.0"
   }
 }
