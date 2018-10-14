@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import {Grid, Cell, Button, TextField, Paper} from 'react-md';
+import {Grid, Cell, Button, TextField, DialogContainer} from 'react-md';
+import 'emoji-mart/css/emoji-mart.css';
+import { Picker } from 'emoji-mart';
+
 
 import './global.js';
 
 class Form extends Component {
   static propTypes = {
+    mediaClass: PropTypes.string,
     disable: PropTypes.bool.isRequired, 
-    callback: PropTypes.func,
     channel: PropTypes.string.isRequired
   };
   constructor(props){
@@ -16,11 +19,21 @@ class Form extends Component {
       name: "Austin",
       message: "",
       disable: props.disable,
-      channel: props.channel
+      channel: props.channel,
+      mediaClass: props.mediaClass,
+      showEmoji: false,
     };
   }
-  onClick = () => {
-    this.props.callback();
+  
+  onEmojiHide = () => {
+    this.setState({ showEmoji: false });
+  };
+  onEmojiShow = () => {
+    this.setState({showEmoji: true});
+  }
+  onEmojiAdd = (data) => {
+    console.log(data);
+    this.setState(prevState => ({message: prevState.message +data.colons, showEmoji: false}));
   }
   handleChange(value, e){
     this.setState({ message: value});
@@ -35,24 +48,31 @@ class Form extends Component {
     }
   };
   render() {
-    const { name, message, channel} = this.state;
+    const { name, message, channel, mediaClass, showEmoji} = this.state;
     const buttonStyle = {
       float: 'right'
     }
+    const textStyle = {
+      paddingLeft: '0',
+      paddingRight: '0',
+      marginBottom: '0',
+      marginTop: '0',
+    }
+    const areaStyle = {
+      lineHeight: '1.5em',
+      marginBottom: '16px'
+    }
     const Buttons = () => (
       <div>
-        <Button style={buttonStyle} onClick={this.onClick} disabled={this.state.disable} icon primary>add_circle</Button>
+        <Button style={buttonStyle} onClick={this.onEmojiShow} disabled={this.state.disable} icon primary>mood</Button>
         <Button style={buttonStyle} type="submit" disabled={this.state.disable} icon primary>send</Button>  
       </div>
     );
     return (
+      <Grid className={'md-title md-title--toolbar ' + this.props.mediaClass} style={{marginRight: '0', width: '100%'}}>
+        <Cell size={12}>
         <form onSubmit={this.handleSubmit}>
           <input type="hidden" name="name" value={this.state.name}/>
-          <Grid>
-            <Cell size={12}>
-              <Paper zDepth={1}>
-                <Grid>
-                  <Cell size={12} align={'bottom'}>
                     <TextField
                       id="message-body"
                       name="message"
@@ -60,23 +80,29 @@ class Form extends Component {
                       block
                       paddedBlock
                       rows={1}
-                      maxRows={0}
+                      maxRows={10}
                       lineDirection={'right'}
                       rightIcon={<Buttons />}
                       onChange={(value, e) => this.handleChange(value, e)}
                       value={this.state.message}
                       disabled={this.state.disable}
-                    />
-                    
-                  </Cell>
-                  {/* <Cell size={2} style={{marginBottom: '16px'}} align={'bottom'} position={'right'}>
-                    
-                  </Cell> */}
-                </Grid>
-              </Paper>
-            </Cell>
-          </Grid>
+                      style={textStyle}
+                      inputStyle={areaStyle}
+                    />  
+                    <DialogContainer
+                      id="simple-list-dialog"
+                      visible={showEmoji}
+                      title="Pick Emoji"
+                      onHide={this.onEmojiHide}
+                      height={530}
+                      width={404}
+                    >
+                    <Picker style={{whiteSpace: 'normal'}} set='twitter' onSelect={this.onEmojiAdd} />
+                    </DialogContainer>
+                  
         </form>
+        </Cell>
+        </Grid>
     );
   }
 }

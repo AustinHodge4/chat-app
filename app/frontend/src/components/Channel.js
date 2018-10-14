@@ -4,7 +4,7 @@ import './global.js';
 import Form from './Form';
 import Messages from "./Messages";
 import {Grid, Cell, Toolbar} from "react-md";
-
+import ReactResizeDetector from 'react-resize-detector';
 
 class Channel extends Component {
 
@@ -17,14 +17,23 @@ class Channel extends Component {
       page: 2,
       channel: props.channel,
       channelAccess: props.channelAccess,
+      scrollBoxHeight: 'calc(100vh - 144px)',
+      messageBoxHeight: '72px',
     }
+    this.scroll = React.createRef();
   }
   static propTypes = {
+    mediaClass: PropTypes.string,
     channelAccess: PropTypes.bool.isRequired,
     channel: PropTypes.string.isRequired,
     endpoint: PropTypes.string.isRequired,
   };
 
+  onResize(width, height){
+    console.log(width);
+    console.log(height);
+    this.setState({scrollBoxHeight: "calc(100vh - "+(height)+"px)", messageBoxHeight: height+'px'});
+  }
   loadMoreMessages = () => {
     fetch(this.props.endpoint+""+this.state.page).then(response => {
       return response.json();
@@ -32,7 +41,7 @@ class Channel extends Component {
       console.log(messages);
       if(Object.keys(messages).length != 0){
       this.setState(prevState => ({
-        data: messages.concat(prevState.data),
+        data: prevState.data.concat(messages),
         page: prevState.page + 1
       }))
     };
@@ -52,7 +61,7 @@ class Channel extends Component {
         console.log("Message:")
         console.log(message.message);
         this.setState(prevState => ({
-          data: [...prevState.data, message.message]
+          data: [message.message, ...prevState.data]
         }))
       }
     }.bind(this)
@@ -68,34 +77,51 @@ class Channel extends Component {
         this.setState({ data: data, loaded: true }); 
         console.log(data); 
       });
-    
+      
   }
-
+  scrollDown(element){
+    if(element){
+      element.scrollTop = element.scrollHeight;
+    }
+  }
+  handleScroll(e){
+    if(e.target.scrollTop <= 0){
+      console.log("Top");
+      this.loadMoreMessages();      
+    }
+  }
   render() {
-    const { data, loaded, placeholder, channel, channelAccess } = this.state;
+    const { data, loaded, placeholder, channel, channelAccess, scrollBoxHeight, messageBoxHeight } = this.state;
+    const messagesContainer = {
+      bottom: '0%',
+      overflow: 'auto',
+      height: scrollBoxHeight,
+    }
     const scrollBox = {
-      overflowY: 'scroll',
-      maxHeight: '76vh',
-      height: '76vh'
+      paddingBottom: messageBoxHeight,
+      minHeight: scrollBoxHeight
     }
     const messageBox = {
       top: 'auto',
       bottom: '0',
-      height: '10%'
+      height: 'auto',
+      maxHeight: '40%',
     }
-    const FormArea = () => (
-      <Grid>
-        <Cell size={12}>
-        <Form disable={!channelAccess} callback={this.loadMoreMessages} channel={channel} />
-          </Cell>
-      </Grid>
-    )
-    return (loaded) ? (    
-      <div>    
-        <Grid className="grid-example">
-          <Cell size={12} style={scrollBox}><Messages messages={data} /></Cell>
-        </Grid>
-        <Toolbar fixed={true} style={messageBox} themed={true} children={<FormArea />} />
+    const flexBox = {
+      display: 'flex',
+      flexFow: 'column',
+      flexDirection: 'column-reverse',
+      alignItems: 'flex-end'
+    }
+    return (loaded) ? (   
+      <div> 
+        <div ref={(element) => (this.scrollDown(element))} style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
+          <Grid style={scrollBox}>
+            <Cell size={12} style={flexBox}><Messages messages={data} /></Cell>
+          </Grid>
+        </div>
+        <ReactResizeDetector handleHeight resizableElementId={'2'} onResize={(width, height) => this.onResize(width, height)}/>
+        <Toolbar id={'2'} fixed={true} style={messageBox} themed={true} title={<Form className={'md-title md-title--toolbar '+this.props.mediaClass} mediaClass={this.props.mediaClass} disable={!channelAccess} channel={channel} />} />
       </div>
       ) : ( <p>{placeholder}</p>);
   }

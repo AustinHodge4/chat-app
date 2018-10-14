@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
-import {IconSeparator, Cell, Avatar, Grid} from 'react-md';
-
+import {Cell, Avatar, Grid} from 'react-md';
+import {Twemoji} from 'react-emoji-render';
 const Timestamp = require('react-timestamp');
 
 class Message extends Component{
@@ -22,15 +22,21 @@ class Message extends Component{
             marginRight: '8px',
             letterSpacing: '0'
         }
+        const messageBox = {
+            marginLeft: 'initial',
+            marginRight: 'initial',
+            width: '100%'
+        }
         const Item = () => (
             <Grid style={gridStyle} noSpacing={true}>
+            
                 <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user}</div><Timestamp className="md-font-light" time={this.props.data.timestamp} precision={2} /></Cell>
-                <Cell size={12} align={'top'}>{this.props.data.message}</Cell>
+                <Cell size={12} align={'top'}><Twemoji text={this.props.data.message} /></Cell>
             </Grid>
         );
         return(
-            <Grid>
-                <Avatar random>O</Avatar>
+            <Grid style={messageBox}>
+                <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'http://i.pravatar.cc/150?u='+this.props.data.user+'@pravatar.com'} />
                 <Cell style={cellStyle} size={11}>
                     <Item />
                 </Cell>

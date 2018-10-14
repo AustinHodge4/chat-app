@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --mode development ./app/frontend/src/index.js --output ./app/frontend/static/frontend/main.js",
-    "login": "webpack --mode development ./app/frontend/src/login.js --output ./app/frontend/static/frontend/login.js",
+    "dev": "webpack --config dev.config.js --progress --colors --mode development",
+    "watch": "webpack --config dev.config.js --watch --mode development",
     "build": "webpack --mode production ./app/frontend/src/index.js --output ./app/frontend/static/frontend/main.js"
   },
   "keywords": [],
@@ -17,14 +17,20 @@
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "css-loader": "^1.0.0",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
+    "style-loader": "^0.23.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "emoji-mart": "^2.8.1",
+    "react-emoji-render": "^0.4.6",
     "react-md": "^1.7.1",
-    "react-timestamp": "^4.4.0"
+    "react-resize-detector": "^3.1.3",
+    "react-timestamp": "^4.4.0",
+    "webpack-bundle-tracker": "^0.4.2-beta"
   }
 }

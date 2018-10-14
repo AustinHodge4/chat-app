@@ -3,19 +3,21 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import Channel from "./Channel";
 import './global.js';
-import { NavigationDrawer, FontIcon, Button} from 'react-md';
+import { NavigationDrawer, Autocomplete, FontIcon, Button, Grid, Cell} from 'react-md';
 
 class App extends Component{
     constructor(props){
         super(props);
         this.state = {
             channels: [],
+            joinedChannels: [],
             channelSelected: false,
             selectedChannelIndex: null,
             activeChannelId: null,
             lastChannelIndex: 1,
             isLoading: true,
             channelAccess: false,
+            autocompleteValue: '',
             navItems: [
                 {
                     key:"channels-header",
@@ -28,7 +30,8 @@ class App extends Component{
                     primaryText:'Log out',
                     leftIcon: <FontIcon>keyboard_arrow_left</FontIcon>
                 }
-            ]
+            ],
+            mediaClass: ''
         }
 
     }
@@ -99,7 +102,7 @@ class App extends Component{
         .then(data => {
             let items = this.createNavItem(this.state.channels, data);
             // console.log(items);
-            this.setState(prevState => ({channels: data, navItems: items[0], lastChannelIndex: items[1], isLoading: false })); 
+            this.setState({channels: data, joinedChannels: data, navItems: items[0], lastChannelIndex: items[1], isLoading: false }); 
         });
     }
     onSelectedChannel(e, channel_id){
@@ -129,6 +132,13 @@ class App extends Component{
             this.setState(prevState => ({navItems: navItems, selectedChannelIndex: channel_index, activeChannelId: channel_id, channelSelected: selectedChannel.active, channelAccess: prevState.selectedChannelIndex == index}));
         }
     }
+    onAutoComplete(suggestion, suggestionIndex, matches){
+        console.log(suggestion)
+        this.setState({activeChannelId: suggestion, channelSelected: true, autocompleteValue: ''})
+    }
+    onAutoCompleteChange(text, e){
+        this.setState({autocompleteValue: text})
+    }
     onButtonClick(e, type){
         if(type == 'Join'){
             // Fetch api
@@ -138,6 +148,16 @@ class App extends Component{
             // Fetch
             this.setState({channelAccess: false});
         }
+    }
+    mediaChange(type, media){
+        let media_class = null;
+        console.log(media);
+        if(media.desktop){
+            media_class = 'md-transition--deceleration md-title--permanent-offset'
+        } else {
+            media_class = ''
+        }
+        this.setState({mediaClass: media_class})
     }
     componentDidMount() {
         chat_socket.onopen = function(){
@@ -153,21 +173,23 @@ class App extends Component{
             console.log(data.message);
             this.fetchRooms();
         }.bind(this)
+        
         this.fetchRooms();
     }
     render() {
-        const {navItems, channelSelected, activeChannelId, isLoading, channelAccess} = this.state;
+        const {navItems, channelSelected, activeChannelId, isLoading, channelAccess, mediaClass, channels, autocompleteValue} = this.state;
         const divStyle = {
             filter: 'blur(5px)',
             width: '100%',
-            height: '100%',
+            height: '90vh',
             pointerEvents: 'none'
           };
         const h3Style = {
-            top: '20%',
-            left: '50%',
+            top: '32%',
             zIndex: '1',
-            position: 'absolute',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            position: 'fixed',
         };
         const channelStyle = {
             fontWeight: '300'
@@ -184,15 +206,38 @@ class App extends Component{
               toolbarTitle={channelSelected? '# '+activeChannelId : "Select a Channel"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}
-              toolbarActions={channelSelected ? (channelAccess ? (<Button onClick={(e) => this.onButtonClick(e, "Leave")} flat primary swapTheming>Leave Channel</Button>) : (<Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>)) : null}
+              onMediaTypeChange={(type, media) => this.mediaChange(type, media)}
+              toolbarChildren={channelAccess ? null : <Autocomplete
+                                                            key={'search-channels'}
+                                                            id={'search-channels'}
+                                                            block
+                                                            placeholder="# Search for a Channel"
+                                                            data={channels}
+                                                            dataLabel={'channel_id'}
+                                                            dataValue={'channel_id'}
+                                                            toolbar
+                                                            value={autocompleteValue}
+                                                            filter={Autocomplete.caseInsensitiveFilter}
+                                                            style={{marginLeft: '32px', maxWidth: '300px'}}
+                                                            listStyle={{maxWidth: '300px'}}
+                                                            onChange={(text, e) => this.onAutoCompleteChange(text, e)}
+                                                            onAutocomplete={(suggestion, suggestionIndex, matches) => (this.onAutoComplete(suggestion, suggestionIndex, matches))}
+                                                        />}
+              toolbarActions={channelSelected ? (
+                  channelAccess ? (<Button onClick={(e) => this.onButtonClick(e, "Leave")} flat primary swapTheming>Leave Channel</Button>) 
+                    : (<Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>)) : null}
             >
                                {channelSelected ? (
-                               channelAccess? (<Channel key={activeChannelId} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />)
+                               channelAccess? (<Channel key={activeChannelId} mediaClass={mediaClass} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />)
                                : (
                                 <div>
-                                    <h2 style={h3Style}>Join <i>{activeChannelId}</i> to view messages </h2>
+                                    <Grid style={{display: 'contents'}}>
+                                        <Cell size={12} offset={mediaClass == '' ? 0 : 3}>
+                                    <div className={'md-display-3'} style={h3Style}>Join <i style={{fontWeight: '200'}}># {activeChannelId}</i> to view messages </div>
+                                    </Cell>
+                                    </Grid>
                                     <div style={divStyle}>
-                                        <Channel key={activeChannelId} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />
+                                        <Channel key={activeChannelId} mediaClass={mediaClass} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />
                                     </div>
                                 </div>
                                )) : null}

@@ -42,12 +42,12 @@ class Messages(APIView):
         channel, created = Channel.objects.get_or_create(channel_id=channel_id)
         print("Created: {}".format(created))
         # We want to show the last 50 messages, ordered most-recent-last
-        messages = Message.objects.filter(channel=channel).order_by('-timestamp').reverse()
+        messages = Message.objects.filter(channel=channel).order_by('-timestamp')
         paginator = Paginator(messages, 10)
-        page =  (paginator.num_pages+1) - int(request.GET.get('page', 1))
+        page = int(request.GET.get('page', 1))
         print(paginator.num_pages)
         print(page)
-        if page <= 0:
+        if page >= paginator.num_pages+1:
             return Response({})
 
         m = paginator.get_page(page)
