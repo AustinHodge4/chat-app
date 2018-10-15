@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import Channel from "./Channel";
 import './global.js';
-import { NavigationDrawer, Autocomplete, FontIcon, Button, Grid, Cell} from 'react-md';
+import { NavigationDrawer, Autocomplete, DialogContainer, TextField,  FontIcon, Button, Grid, Cell} from 'react-md';
 
 class App extends Component{
     constructor(props){
@@ -16,6 +16,8 @@ class App extends Component{
             activeChannelId: null,
             lastChannelIndex: 1,
             isLoading: true,
+            showCreateChannelDialog: false,
+            newChannelName: '',
             channelAccess: false,
             autocompleteValue: '',
             navItems: [
@@ -23,6 +25,12 @@ class App extends Component{
                     key:"channels-header",
                     subheader: true,
                     primaryText: "Channels",
+                },
+                {
+                    key: 'create-channel',
+                    primaryText: 'Create Channel',
+                    rightIcon: <FontIcon key={"create-channel-icon"} primary>add_circle</FontIcon>,
+                    onClick: (e) => this.onOpenCreateChannelDialog(),
                 },
                 { key: 'divider', divider: true }, 
                 {
@@ -112,7 +120,7 @@ class App extends Component{
         for(var index = 0; index < navItems.length; index++){
             let channel = navItems[index];
 
-            if (channel.divider || channel.subheader || channel.key == 'logout')
+            if (channel.divider || channel.subheader || channel.key == 'logout' || channel.key == 'create-channel')
                 continue;
 
             if(channel.key == channel_id){
@@ -131,6 +139,16 @@ class App extends Component{
 
             this.setState(prevState => ({navItems: navItems, selectedChannelIndex: channel_index, activeChannelId: channel_id, channelSelected: selectedChannel.active, channelAccess: prevState.selectedChannelIndex == index}));
         }
+    }
+    onOpenCreateChannelDialog(e){
+        this.setState({showCreateChannelDialog: true})
+    }
+    onCloseCreateChannelDialog(e){
+        this.setState({showCreateChannelDialog: false, newChannelName: ''})
+    }
+    onCreateChannel(e){
+        console.log("Creating Channel " + this.state.newChannelName)
+        this.setState({showCreateChannelDialog: false, newChannelName: ''})
     }
     onAutoComplete(suggestion, suggestionIndex, matches){
         console.log(suggestion)
@@ -177,7 +195,8 @@ class App extends Component{
         this.fetchRooms();
     }
     render() {
-        const {navItems, channelSelected, activeChannelId, isLoading, channelAccess, mediaClass, channels, autocompleteValue} = this.state;
+        const {navItems, channelSelected, activeChannelId, isLoading, channelAccess, mediaClass, 
+            channels, autocompleteValue, showCreateChannelDialog, newChannelName} = this.state;
         const divStyle = {
             filter: 'blur(5px)',
             width: '100%',
@@ -227,6 +246,21 @@ class App extends Component{
                   channelAccess ? (<Button onClick={(e) => this.onButtonClick(e, "Leave")} flat primary swapTheming>Leave Channel</Button>) 
                     : (<Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>)) : null}
             >
+            <DialogContainer
+                id="simple-action-dialog"
+                visible={showCreateChannelDialog}
+                onHide={(e) => {(this.onCloseCreateChannelDialog(e))}}
+                actions={[<Button flat primary onClick={(e) => this.onCreateChannel(e)}>Confirm</Button>]}
+                title="Create Channel"
+            >
+                <TextField
+                    label="Name"
+                    placeholder="Channel name"
+                    value={newChannelName}
+                    onChange={(value, e) => this.setState({newChannelName: value})}
+                />
+            </DialogContainer>
+
                                {channelSelected ? (
                                channelAccess? (<Channel key={activeChannelId} mediaClass={mediaClass} channelAccess={channelAccess} channel={activeChannelId} endpoint={window.location.href+activeChannelId+'/messages?page='} />)
                                : (
