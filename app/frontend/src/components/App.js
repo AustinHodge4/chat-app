@@ -211,7 +211,7 @@ class App extends Component{
                                                             key={'search-channels'}
                                                             id={'search-channels'}
                                                             block
-                                                            placeholder="# Search for a Channel"
+                                                            placeholder={mediaClass == '' ? '# Search': '# Search for a Channel'}
                                                             data={channels}
                                                             dataLabel={'channel_id'}
                                                             dataValue={'channel_id'}

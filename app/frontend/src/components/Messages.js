@@ -18,7 +18,11 @@ class Messages extends Component{
     
     return(
       !this.props.messages.length ? (
-        <p>Nothing to show</p>
+        <Grid>
+          <Cell size={12}>
+          <h1>Be the first to say something!</h1>
+          </Cell>
+        </Grid>
       ) : (
         this.props.messages.map((message, index) => <Message key={index} data={message} mobile={this.props.mobile} />)   
     ));
