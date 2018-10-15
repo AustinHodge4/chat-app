@@ -11,6 +11,7 @@ const styles = theme => ({
 
 class Messages extends Component{
   static propTypes = {
+    mobile: PropTypes.bool.isRequired,
     messages: PropTypes.array.isRequired
   };
   render(){
@@ -19,7 +20,7 @@ class Messages extends Component{
       !this.props.messages.length ? (
         <p>Nothing to show</p>
       ) : (
-        this.props.messages.map((message, index) => <Message key={index} data={message}/>)   
+        this.props.messages.map((message, index) => <Message key={index} data={message} mobile={this.props.mobile} />)   
     ));
   }
 }

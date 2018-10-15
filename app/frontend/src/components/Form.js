@@ -94,10 +94,10 @@ class Form extends Component {
                       visible={showEmoji}
                       title="Pick Emoji"
                       onHide={this.onEmojiHide}
-                      height={530}
-                      width={404}
+                      
+                      dialogStyle={{width: '100%', height: '100%', maxHeight: '530px', maxWidth: '404px'}}
                     >
-                    <Picker style={{whiteSpace: 'normal'}} set='twitter' onSelect={this.onEmojiAdd} />
+                    <Picker style={{whiteSpace: 'normal', width: '100%'}} emojiSize={32} set='twitter' onSelect={this.onEmojiAdd} />
                     </DialogContainer>
                   
         </form>

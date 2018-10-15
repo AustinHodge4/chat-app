@@ -31,7 +31,7 @@ class App extends Component{
                     leftIcon: <FontIcon>keyboard_arrow_left</FontIcon>
                 }
             ],
-            mediaClass: ''
+            mediaClass: '',
         }
 
     }

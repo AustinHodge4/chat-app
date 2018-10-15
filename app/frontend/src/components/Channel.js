@@ -117,7 +117,7 @@ class Channel extends Component {
       <div> 
         <div ref={(element) => (this.scrollDown(element))} style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
           <Grid style={scrollBox}>
-            <Cell size={12} style={flexBox}><Messages messages={data} /></Cell>
+            <Cell size={12} style={flexBox}><Messages messages={data} mobile={this.props.mediaClass == ''} /></Cell>
           </Grid>
         </div>
         <ReactResizeDetector handleHeight resizableElementId={'2'} onResize={(width, height) => this.onResize(width, height)}/>
