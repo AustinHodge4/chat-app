@@ -152,6 +152,7 @@ class App extends Component{
     }
     onAutoComplete(suggestion, suggestionIndex, matches){
         console.log(suggestion)
+        change_socket(suggestion+'/');
         this.setState({activeChannelId: suggestion, channelSelected: true, autocompleteValue: ''})
     }
     onAutoCompleteChange(text, e){
@@ -254,6 +255,7 @@ class App extends Component{
                 title="Create Channel"
             >
                 <TextField
+                    id="channel-name"
                     label="Name"
                     placeholder="Channel name"
                     value={newChannelName}
