@@ -250,7 +250,7 @@ class App extends Component{
                 id="simple-action-dialog"
                 visible={showCreateChannelDialog}
                 onHide={(e) => {(this.onCloseCreateChannelDialog(e))}}
-                actions={[<Button flat primary onClick={(e) => this.onCreateChannel(e)}>Confirm</Button>]}
+                actions={[<Button flat primary onClick={(e) => this.onCreateChannel(e)}>Create</Button>]}
                 title="Create Channel"
             >
                 <TextField
