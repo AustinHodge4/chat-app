@@ -11,12 +11,12 @@ class Form extends Component {
   static propTypes = {
     mediaClass: PropTypes.string,
     disable: PropTypes.bool.isRequired, 
-    channel: PropTypes.string.isRequired
+    channel: PropTypes.object.isRequired,
+    user: PropTypes.object.isRequired
   };
   constructor(props){
     super(props);
     this.state = {
-      name: "Austin",
       message: "",
       disable: props.disable,
       channel: props.channel,
@@ -40,10 +40,10 @@ class Form extends Component {
   };
   handleSubmit = e => {
     e.preventDefault();
-    const { name, message} = this.state;
+    const {message} = this.state;
     if(/\S/.test(message)){    
       this.setState({'message': ''});
-      const message_data = { type: 'message_event', name: name, message: message };
+      const message_data = { type: 'message_event', user: this.props.user, message: message };
       chat_socket.send(JSON.stringify(message_data));
     }
   };
@@ -71,37 +71,35 @@ class Form extends Component {
     return (
       <Grid className={'md-title md-title--toolbar ' + this.props.mediaClass} style={{marginRight: '0', width: '100%'}}>
         <Cell size={12}>
-        <form onSubmit={this.handleSubmit}>
-          <input type="hidden" name="name" value={this.state.name}/>
-                    <TextField
-                      id="message-body"
-                      name="message"
-                      placeholder={"Message #"+channel}
-                      block
-                      paddedBlock
-                      rows={1}
-                      maxRows={10}
-                      lineDirection={'right'}
-                      rightIcon={<Buttons />}
-                      onChange={(value, e) => this.handleChange(value, e)}
-                      value={this.state.message}
-                      disabled={this.state.disable}
-                      style={textStyle}
-                      inputStyle={areaStyle}
-                    />  
-                    <DialogContainer
-                      id="simple-list-dialog"
-                      visible={showEmoji}
-                      title="Pick Emoji"
-                      onHide={this.onEmojiHide}
-                      
-                      dialogStyle={{width: '100%', height: '100%', maxHeight: '530px', maxWidth: '404px'}}
-                    >
-                    <Picker style={{whiteSpace: 'normal', width: '100%'}} emojiSize={32} set='twitter' onSelect={this.onEmojiAdd} />
-                    </DialogContainer>
-                  
-        </form>
-        </Cell>
+          <form onSubmit={this.handleSubmit}>
+            <input type="hidden" name="name" value={this.state.name}/>
+              <TextField
+                id="message-body"
+                name="message"
+                placeholder={"Message #"+channel.channel_name}
+                block
+                paddedBlock
+                rows={1}
+                maxRows={10}
+                lineDirection={'right'}
+                rightIcon={<Buttons />}
+                onChange={(value, e) => this.handleChange(value, e)}
+                value={this.state.message}
+                disabled={this.state.disable}
+                style={textStyle}
+                inputStyle={areaStyle}
+              />  
+              <DialogContainer
+                id="simple-list-dialog"
+                visible={showEmoji}
+                title="Pick Emoji"
+                onHide={this.onEmojiHide}
+                dialogStyle={{width: '100%', height: '100%', maxHeight: '530px', maxWidth: '404px'}}
+              >
+                <Picker style={{whiteSpace: 'normal', width: '100%'}} emojiSize={32} set='twitter' onSelect={this.onEmojiAdd} />
+              </DialogContainer>      
+            </form>
+          </Cell>
         </Grid>
     );
   }

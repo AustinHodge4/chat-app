@@ -1,9 +1,10 @@
 from django.urls import path
-from chat.views import index, Messages, Rooms, login
+from chat.views import index, login, MessageView, ChannelView, UserView
 
 urlpatterns = [
     path('home/', login),
     path('api/', index),
-    path('api/rooms/', Rooms.as_view()),
-    path('api/<slug:channel_id>/messages/', Messages.as_view()),
+    path('api/user/', UserView.as_view()),
+    path('api/channels/', ChannelView.as_view()),
+    path('api/<slug:channel_name>/messages/', MessageView.as_view()),
 ]

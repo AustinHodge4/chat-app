@@ -25,8 +25,11 @@ class Channel extends Component {
   static propTypes = {
     mediaClass: PropTypes.string,
     channelAccess: PropTypes.bool.isRequired,
-    channel: PropTypes.string.isRequired,
+    channel: PropTypes.object.isRequired,
     endpoint: PropTypes.string.isRequired,
+    user: PropTypes.object.isRequired,
+    joinCallback: PropTypes.func.isRequired,
+    leaveCallback: PropTypes.func.isRequired
   };
 
   onResize(width, height){
@@ -57,12 +60,20 @@ class Channel extends Component {
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
       console.log(message);
-      if(message.type == 'message_event'){
+      if(message.event == 'message'){
         console.log("Message:")
         console.log(message.message);
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
         }))
+      }
+      else if(message.event == 'join_channel'){
+        console.log("Join")
+        this.props.joinCallback(message.channel_name);
+      }
+      else if(message.event == 'leave_channel' || message.event == 'delete_channel'){
+        console.log("Leave")
+        this.props.leaveCallback();
       }
     }.bind(this)
 
@@ -121,7 +132,7 @@ class Channel extends Component {
           </Grid>
         </div>
         <ReactResizeDetector handleHeight resizableElementId={'2'} onResize={(width, height) => this.onResize(width, height)}/>
-        <Toolbar id={'2'} fixed={true} style={messageBox} themed={true} title={<Form className={'md-title md-title--toolbar '+this.props.mediaClass} mediaClass={this.props.mediaClass} disable={!channelAccess} channel={channel} />} />
+        <Toolbar id={'2'} fixed={true} style={messageBox} themed={true} title={<Form className={'md-title md-title--toolbar '+this.props.mediaClass} mediaClass={this.props.mediaClass} disable={!channelAccess} channel={channel} user={this.props.user} />} />
       </div>
       ) : ( <p>{placeholder}</p>);
   }
