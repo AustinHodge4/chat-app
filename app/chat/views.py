@@ -50,8 +50,8 @@ class ChannelView(APIView):
         user = User.objects.get(username="austin")
 
         subscribed_channels = Channel.objects.filter(users=user)
-        print("Sub Channels: {}".format(subscribed_channels))
-        print("All Channels: {}".format(channels))
+        # print("Sub Channels: {}".format(subscribed_channels))
+        # print("All Channels: {}".format(channels))
     
         channels_serializer = ChannelSerializer(channels, many=True)
         sub_channel_serializer = ChannelSerializer(subscribed_channels, many=True)
