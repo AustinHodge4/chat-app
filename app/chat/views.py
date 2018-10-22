@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from chat.models import Channel, Message
 from chat.serializers import ChannelSerializer, MessageSerializer, UserSerializer
@@ -9,32 +11,47 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 import json
+from django.shortcuts import redirect
 
-#@login_required(login_url='/home/')
+@login_required(login_url='/home/')
 def index(request):
+    if request.user.is_authenticated:
+        print("Fail")
     channel, _ = Channel.objects.get_or_create(channel_name="generic")
-    user = User.objects.get(username="austin")
+    user = request.user
     if not Channel.objects.filter(channel_name="generic", users=user).exists():
         channel.users.add(user)
         channel.save()
 
     return render(request, 'index.html')
 
-def login(request):
+def loginuser(request):
     if request.method == 'POST':
         # login user
-        username = request['username']
-        
-        return render(request, 'index.html')
+        payload = json.loads(request.body)
+        username = payload['username']
+        password = payload['password']
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            print("Logging in")
+            return JsonResponse({'success': True})
+        else:
+            print(" Invalid Login")
+            return JsonResponse({'success': False, 'error_message': 'Failed to login!'})
     else:
         return render(request, 'login.html')
+def logoutuser(request):
+    logout(request)
+    return JsonResponse({'success': True})
 
 class UserView(APIView):
     renderer_classes = (JSONRenderer, )
     
     def get(self, request, format=None):
         ''' Returns active signin user '''
-        user = User.objects.get(username="austin")
+        user = request.user
 
         user_serializer = UserSerializer(user)
         return Response(user_serializer.data)
@@ -47,7 +64,7 @@ class ChannelView(APIView):
         Return a list of all rooms.
         """
         channels = Channel.objects.all()
-        user = User.objects.get(username="austin")
+        user = request.user
 
         subscribed_channels = Channel.objects.filter(users=user)
         print("Sub Channels: {}".format(subscribed_channels))

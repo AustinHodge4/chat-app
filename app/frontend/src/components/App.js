@@ -42,7 +42,8 @@ class App extends Component{
                 {
                     key: 'logout', 
                     primaryText:'Log out',
-                    leftIcon: <FontIcon>keyboard_arrow_left</FontIcon>
+                    leftIcon: <FontIcon>keyboard_arrow_left</FontIcon>,
+                    onClick: (e) => this.onLogOut()
                 }
             ],
             mediaClass: '',
@@ -154,6 +155,19 @@ class App extends Component{
         .then(data => {
             console.log(data);
             this.setState({user: data}); 
+        });
+    }
+    onLogOut(e){
+        fetch('../api/user')
+        .then(response => {
+            if (response.status !== 200) {
+                return this.setState({ placeholder: "User not found" });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            window.location.href = '../home';
         });
     }
     onSelectedChannel(e, channel_name){
