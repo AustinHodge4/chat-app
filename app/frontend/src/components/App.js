@@ -295,16 +295,19 @@ class App extends Component{
     }
     onJoinChannel(channel_name){
         console.log(channel_name);
-        this.fetchChannels();
-        this.onSelectedChannel(null, channel_name);
+        this.fetchChannels().then(data => {;
+        this.setState({activeChannel: this.getChannelObject(channel_name)});
+        })
     }
     onLeaveChannel(local){
         console.log("Load Channels");
-        this.fetchChannels();
-        if(local){
-            this.setState({channelSelected: false, channelAccess: false});
-        }
-
+        this.fetchChannels().then(data =>{
+            if(local){
+                this.setState({channelSelected: false, channelAccess: false});
+            } else {
+                this.setState(prevState => ({activeChannel: this.getChannelObject(prevState.activeChannel.channel_name)}));
+            }
+        });
     }
     onMediaChange(type, media){
         let media_class = null;
@@ -461,7 +464,7 @@ class App extends Component{
                                 <div>
                                     <Grid style={{display: 'contents'}}>
                                         <Cell size={12} offset={mediaClass == '' ? 0 : 3}>
-                                    <div className={'md-display-3'} style={h3Style}>Join <i style={{fontWeight: '200'}}># {activeChannel}</i> to view messages </div>
+                                    <div className={'md-display-3'} style={h3Style}>Join <i style={{fontWeight: '200'}}># {activeChannel.channel_name}</i> to view messages </div>
                                     </Cell>
                                     </Grid>
                                     <div style={divStyle}>

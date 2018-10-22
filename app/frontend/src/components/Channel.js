@@ -69,13 +69,22 @@ class Channel extends Component {
       }
       else if(message.event == 'join_channel'){
         console.log("Someone Join")
-        if(this.props.user == message.user)
+        console.log(this.props.user);
+        if(this.props.user.username == message.user.username){
           this.props.joinCallback(message.channel_name);
+          console.log("You Join");
+        } else {
+          this.props.leaveCallback(false);
+        }
       }
       else if(message.event == 'leave_channel' ){
         console.log("Someone Leave")
-        if(this.props.user == message.user)
+        if(this.props.user.username == message.user.username){
           this.props.leaveCallback(true);
+          console.log("You Leave")
+        } else {
+          this.props.leaveCallback(false);
+        }
       }
       else if(message.event == 'delete_channel'){
         if(this.props.channel.channel_name == message.channel_name)
@@ -85,7 +94,7 @@ class Channel extends Component {
       }
       else if(message.event == 'add_channel'){
         console.log("Channel spot")
-        this.leaveCallback(false);
+        this.props.leaveCallback(false);
       }
     }.bind(this)
 
