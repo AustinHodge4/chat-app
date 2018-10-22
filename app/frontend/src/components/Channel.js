@@ -60,7 +60,7 @@ class Channel extends Component {
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
       console.log(message);
-      if(message.event == 'message'){
+      if(message.event == 'message_channel'){
         console.log("Message:")
         console.log(message.message);
         this.setState(prevState => ({
@@ -68,12 +68,24 @@ class Channel extends Component {
         }))
       }
       else if(message.event == 'join_channel'){
-        console.log("Join")
-        this.props.joinCallback(message.channel_name);
+        console.log("Someone Join")
+        if(this.props.user == message.user)
+          this.props.joinCallback(message.channel_name);
       }
-      else if(message.event == 'leave_channel' || message.event == 'delete_channel'){
-        console.log("Leave")
-        this.props.leaveCallback();
+      else if(message.event == 'leave_channel' ){
+        console.log("Someone Leave")
+        if(this.props.user == message.user)
+          this.props.leaveCallback(true);
+      }
+      else if(message.event == 'delete_channel'){
+        if(this.props.channel.channel_name == message.channel_name)
+          this.props.leaveCallback(true);
+        else
+          this.props.leaveCallback(false);
+      }
+      else if(message.event == 'add_channel'){
+        console.log("Channel spot")
+        this.leaveCallback(false);
       }
     }.bind(this)
 

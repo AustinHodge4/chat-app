@@ -1,15 +1,19 @@
 from chat.models import Channel, Message
-from chat.serializers import  MessageSerializer
+from chat.serializers import  MessageSerializer, UserSerializer
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from django.contrib.auth.models import User
 import json
 
 class ChatConsumer(WebsocketConsumer):
+
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['channel_name']
         self.room_group_name = 'chat_%s' % self.room_name
-
+        channels = Channel.objects.all()
+        self.groups.extend(['chat_%s' % channel.channel_name for channel in channels])
+        if not self.room_group_name in self.groups:
+            self.groups.append(self.room_group_name)
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
@@ -20,6 +24,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
+        self.groups.remove(self.room_group_name)
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
@@ -34,6 +39,7 @@ class ChatConsumer(WebsocketConsumer):
         
         channel_name = self.room_name
         channel = Channel.objects.get(channel_name=channel_name)
+
 
         print(message_type)
         if message_type == 'message_event':
@@ -56,7 +62,7 @@ class ChatConsumer(WebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'broadcast',
-                    'event': 'message',
+                    'event': 'message_channel',
                     'message': serializer.data,
                 }
             )
@@ -69,7 +75,8 @@ class ChatConsumer(WebsocketConsumer):
                     {
                         'type': 'broadcast',
                         'event': 'join_channel',
-                        'channel_name': self.room_name
+                        'channel_name': self.room_name,
+                        'user': user_json
                     }
                 )
         elif message_type == 'leave_channel':
@@ -81,65 +88,45 @@ class ChatConsumer(WebsocketConsumer):
                     {
                         'type': 'broadcast',
                         'event': 'leave_channel',
-                        'channel_name': self.room_name
+                        'channel_name': self.room_name,
+                        'user': user_json
                     }
                 )
         elif message_type == 'delete_channel':
             if channel.creator == user:
+                for group in self.groups:
+                    async_to_sync(self.channel_layer.group_send)(
+                        group,
+                        {
+                            'type': 'broadcast',
+                            'event': 'delete_channel',
+                            'channel_name': self.room_name,
+                            'user': user_json
+                        }
+                    )
+                self.groups.remove('chat_%s' % channel.channel_name)
                 channel.delete()
+        elif message_type == 'add_channel':
+            channel_n = text_data_json['channel_name']
+            
+            print("Channel: {}".format(channel_n))
+            print("Groups: {}".format(self.groups))
+            for group in self.groups:
                 async_to_sync(self.channel_layer.group_send)(
-                    self.room_group_name,
+                    group,
                     {
                         'type': 'broadcast',
-                        'event': 'delete_channel',
-                        'channel_name': self.room_name
+                        'event': 'add_channel',
+                        'channel_name': self.room_name,
+                        'user': user_json
                     }
                 )
 
+            if not 'chat_%s' % channel_n in self.groups:
+                self.groups.append('chat_%s' % channel_n)
+
     # Receive message from room group
     def broadcast(self, event):
-        print(json.dumps(event))
-        # Send message to WebSocket
-        self.send(text_data=json.dumps(event))
-
-class RoomConsumer(WebsocketConsumer):
-    def connect(self):
-        self.room_name = 'rooms'
-        self.room_group_name = 'default_%s' % self.room_name
-
-        # Join room group
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        self.accept()
-
-    def disconnect(self, close_code):
-        # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    # Receive message from WebSocket
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
-        print("Message: {}".format(message))
-
-        # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'room_event',
-                'message': message
-            }
-        )
-
-    # Receive message from room group
-    def room_event(self, event):
         print(json.dumps(event))
         # Send message to WebSocket
         self.send(text_data=json.dumps(event))

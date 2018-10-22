@@ -14,9 +14,9 @@ class App extends Component{
             channels: [],
             subscribedChannels: [],
             channelSelected: false,
-            user: null,
+            channelAccess: false,
             activeChannel: null,
-            lastChannelIndex: 1,
+            user: null,
             isLoading: true,
             showCreateChannelDialog: false,
             showDeleteChannelDialog: false,
@@ -24,8 +24,8 @@ class App extends Component{
             newChannelName: '',
             createChannelError: '',
             createChannelErrorState: false,
-            channelAccess: false,
             autocompleteValue: '',
+            lastChannelIndex: 1,
             navItems: [
                 {
                     key:"channels-header",
@@ -173,8 +173,7 @@ class App extends Component{
     onSelectedChannel(e, channel_name){
         const navItems = this.state.navItems;
         let selectedChannel = null;
-        console.log("Selected");
-        console.log(channel_name);
+
         for(var index = 0; index < navItems.length; index++){
             let channel = navItems[index];
 
@@ -192,9 +191,10 @@ class App extends Component{
             if(selectedChannel.active)
                 change_socket(channel_name+'/');
             else
-                change_socket("");
+                change_socket("generic/");
             this.setState(prevState => ({navItems: navItems, activeChannel: this.getChannelObject(channel_name), channelSelected: selectedChannel.active, channelAccess: (selectedChannel.active && this.isChannelSubscribed(selectedChannel.channel_name))}));
         }
+        return true
     }
     onOpenChannelUsersDialog(e){
         this.setState({showChannelUsersDialog: true});
@@ -248,8 +248,11 @@ class App extends Component{
             .then(data => {
                 console.log(data);
                 if(data.success){
+                    chat_socket.send(JSON.stringify({ type: 'add_channel',  user: this.state.user, channel_name: this.state.newChannelName }))
+                    console.log("Fetching local")
                     this.fetchChannels().then(done => {
-                    this.onSelectedChannel(null, data.channel_name)});
+                        return this.onSelectedChannel(null, data.channel_name);
+                    });
                     this.setState({showCreateChannelDialog: false, newChannelName: ''})
                 } else {
                     this.setState({createChannelErrorState: true, createChannelError: data.reason})
@@ -295,10 +298,12 @@ class App extends Component{
         this.fetchChannels();
         this.onSelectedChannel(null, channel_name);
     }
-    onLeaveChannel(){
+    onLeaveChannel(local){
         console.log("Load Channels");
         this.fetchChannels();
-        this.setState({channelSelected: false, channelAccess: false});
+        if(local){
+            this.setState({channelSelected: false, channelAccess: false});
+        }
 
     }
     onMediaChange(type, media){
@@ -312,17 +317,19 @@ class App extends Component{
     }
     componentDidMount() {
         chat_socket.onopen = function(){
-            console.log("Connected to chat socket: No room selected");
+            console.log("Connected to chat socket: Generic");
         }
         chat_socket.onclose = function(){
-            console.log("Disconnected from chat socket: No room selected");
+            console.log("Disconnected from chat socket: Generic");
         }
         chat_socket.onmessage = function(m){
             var data = JSON.parse(m.data);
-            console.log("Message:")
-            console.log(data.type);
-            console.log(data.message);
-            this.fetchChannels();
+            console.log("App.js:")
+            console.log(data.event);
+            if(data.event == 'add_channel' || data.event == 'delete_channel'){
+                console.log("Fetching from websocket")
+                this.fetchChannels();
+            }
         }.bind(this)
         this.fetchUser();
         this.fetchChannels();
@@ -371,7 +378,7 @@ class App extends Component{
             </MenuButton>
         );
         return (
-            isLoading ? null : (
+            isLoading ? "Loading" : (
             <NavigationDrawer
               drawerId="main-navigation"
               drawerTitle="chat-app"
@@ -422,7 +429,8 @@ class App extends Component{
                 id="delete_channel_dialog"
                 visible={showDeleteChannelDialog}
                 onHide={(e) => {(this.onCloseDeleteChannelDialog(e))}}
-                actions={[<Button flat secondary onClick={(e) => this.onButtonClick(e, 'Delete')}>Delete Channel</Button>]}
+                actions={[<Button flat primary onClick={(e) => this.onCloseDeleteChannelDialog(e)}>Cancel</Button>,
+                        <Button flat secondary onClick={(e) => this.onButtonClick(e, 'Delete')}>Delete Channel</Button>]}
                 title="Delete Channel?"
             />
             {activeChannel != null ? 
@@ -439,7 +447,7 @@ class App extends Component{
                         primaryText={user.username}
                         primaryTextStyle={nameStyle}
                         secondaryText={user.first_name + " " + user.last_name}
-                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'http://i.pravatar.cc/150?u='+user.username+'@pravatar.com'} />}
+                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+user.username} />}
                     />)}
                 </List>
             </DialogContainer>
@@ -447,7 +455,7 @@ class App extends Component{
 
                                {channelSelected ? (
                                channelAccess? (<Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
-                                                        channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={() => this.onLeaveChannel()}
+                                                        channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
                                                         endpoint={window.location.href+activeChannel.channel_name+'/messages?page='} />)
                                : (
                                 <div>
@@ -458,14 +466,13 @@ class App extends Component{
                                     </Grid>
                                     <div style={divStyle}>
                                         <Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
-                                                channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={() => this.onLeaveChannel()}
+                                                channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
                                                 endpoint={window.location.href+activeChannel.channel_name+'/messages?page='} />
                                     </div>
                                 </div>
                                )) : null}
             </NavigationDrawer>
             )
-            
           );
     }
 }

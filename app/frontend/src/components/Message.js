@@ -37,7 +37,7 @@ class Message extends Component{
         );
         return(
             <Grid style={messageBox}>
-                <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'http://i.pravatar.cc/150?u='+this.props.data.user.username+'@pravatar.com'} />
+                <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.props.data.user.username} />
                 <Cell style={cellStyle} size={this.props.mobile ? 3 : 11}>
                     <Item />
                 </Cell>
