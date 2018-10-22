@@ -19,6 +19,7 @@ class Channel extends Component {
       channelAccess: props.channelAccess,
       scrollBoxHeight: 'calc(100vh - 144px)',
       messageBoxHeight: '72px',
+      prevScrollHeight: null,
     }
     this.scroll = React.createRef();
   }
@@ -33,12 +34,10 @@ class Channel extends Component {
   };
 
   onResize(width, height){
-    console.log(width);
-    console.log(height);
     this.setState({scrollBoxHeight: "calc(100vh - "+(height)+"px)", messageBoxHeight: height+'px'});
   }
   loadMoreMessages = () => {
-    fetch(this.props.endpoint+""+this.state.page).then(response => {
+    return fetch(this.props.endpoint+""+this.state.page).then(response => {
       return response.json();
     }).then(messages =>{
       console.log(messages);
@@ -69,7 +68,6 @@ class Channel extends Component {
       }
       else if(message.event == 'join_channel'){
         console.log("Someone Join")
-        console.log(this.props.user);
         if(this.props.user.username == message.user.username){
           this.props.joinCallback(message.channel_name);
           console.log("You Join");
@@ -87,14 +85,18 @@ class Channel extends Component {
         }
       }
       else if(message.event == 'delete_channel'){
-        if(this.props.channel.channel_name == message.channel_name)
-          this.props.leaveCallback(true);
-        else
-          this.props.leaveCallback(false);
+        console.log("Somone Delete Channel")
+        if(this.props.channel){
+          if(this.props.channel.channel_name == message.channel_name)
+            this.props.leaveCallback(true);
+          else
+            this.props.leaveCallback(false);
+        }
       }
       else if(message.event == 'add_channel'){
-        console.log("Channel spot")
-        this.props.leaveCallback(false);
+        console.log("Someone Add Channel")
+        if(this.props.user.username != message.user.username)
+          this.props.leaveCallback(false);
       }
     }.bind(this)
 
@@ -107,7 +109,8 @@ class Channel extends Component {
       })
       .then(data => {
         this.setState({ data: data, loaded: true }); 
-        console.log(data); 
+        console.log(data);
+        this.scrollDown(this.refs['scroll-box']);
       });
       
   }
@@ -118,8 +121,12 @@ class Channel extends Component {
   }
   handleScroll(e){
     if(e.target.scrollTop <= 0){
-      console.log("Top");
-      this.loadMoreMessages();      
+      this.setState({prevScrollHeight: e.target.scrollHeight}, () => {
+        this.loadMoreMessages().then(data => {
+          this.refs['scroll-box'].scrollTop =  this.refs['scroll-box'].scrollHeight - this.state.prevScrollHeight;
+        });      
+      });
+      
     }
   }
   render() {
@@ -147,7 +154,7 @@ class Channel extends Component {
     }
     return (loaded) ? (   
       <div> 
-        <div ref={(element) => (this.scrollDown(element))} style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
+        <div ref="scroll-box" style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
           <Grid style={scrollBox}>
             <Cell size={12} style={flexBox}><Messages messages={data} mobile={this.props.mediaClass == ''} /></Cell>
           </Grid>

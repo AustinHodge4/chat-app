@@ -124,9 +124,10 @@ class ChatConsumer(WebsocketConsumer):
 
             if not 'chat_%s' % channel_n in self.groups:
                 self.groups.append('chat_%s' % channel_n)
+        print(self.groups)
 
     # Receive message from room group
     def broadcast(self, event):
-        print(json.dumps(event))
+        #print(json.dumps(event))
         # Send message to WebSocket
         self.send(text_data=json.dumps(event))

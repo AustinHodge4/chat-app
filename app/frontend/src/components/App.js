@@ -45,6 +45,7 @@ class App extends Component{
                     leftIcon: <FontIcon>keyboard_arrow_left</FontIcon>,
                     onClick: (e) => this.onLogOut()
                 }
+
             ],
             mediaClass: '',
         }
@@ -122,6 +123,15 @@ class App extends Component{
         .then(data => {
             console.log(data);
             let items = this.createNavItem(this.state.subscribedChannels, data.subscribed_channels);
+            if(items[0][items[1]+2].key != 'user'){
+                items[0].splice(items[1]+2, 0, {
+                    key: 'user', 
+                    primaryText: this.state.user.username,
+                    secondaryText: this.state.user.first_name + ' ' + this.state.user.last_name,
+                    leftAvatar: <Avatar style={{border: 'none', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.state.user.username} />,
+                })
+            }
+            
             this.setState({channels: data.all_channels, subscribedChannels: data.subscribed_channels, navItems: items[0], lastChannelIndex: items[1], isLoading: false }); 
         })
     }
@@ -290,20 +300,17 @@ class App extends Component{
         else if(type == 'Delete'){
             const message_data = { type: 'delete_channel', user: this.state.user};
             chat_socket.send(JSON.stringify(message_data));
-            this.setState({channelAccess: false, channelSelected: false, showDeleteChannelDialog: false});
         }
     }
     onJoinChannel(channel_name){
-        console.log(channel_name);
         this.fetchChannels().then(data => {;
         this.setState({activeChannel: this.getChannelObject(channel_name)});
         })
     }
     onLeaveChannel(local){
-        console.log("Load Channels");
         this.fetchChannels().then(data =>{
             if(local){
-                this.setState({channelSelected: false, channelAccess: false});
+                this.setState({channelSelected: false, channelAccess: false, activeChannel: null, showDeleteChannelDialog: false});
             } else {
                 this.setState(prevState => ({activeChannel: this.getChannelObject(prevState.activeChannel.channel_name)}));
             }
@@ -386,6 +393,7 @@ class App extends Component{
               drawerId="main-navigation"
               drawerTitle="chat-app"
               toolbarId="main-toolbar"
+              tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
               toolbarTitle={channelSelected? '# '+activeChannel.channel_name : "Select a Channel"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}

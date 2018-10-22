@@ -3,12 +3,6 @@ import PropTypes from "prop-types";
 import Message from './Message';
 import {Grid, Cell} from 'react-md';
 
-const styles = theme => ({
-    root: {
-      flexGrow: 1,
-    },
-  });
-
 class Messages extends Component{
   static propTypes = {
     mobile: PropTypes.bool.isRequired,

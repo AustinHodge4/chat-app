@@ -121,6 +121,7 @@ class Login extends Component {
                     type="text"
                     leftIcon={<FontIcon>account_box</FontIcon>}
                     required
+                    autoComplete={'username'}
                     onChange={(value, e) => this.handleChange(value, e, 'username')}
                   />
                   <TextField
@@ -129,6 +130,7 @@ class Login extends Component {
                     type="password"
                     leftIcon={<FontIcon>lock</FontIcon>}
                     required
+                    autoComplete={'current-password'}
                     onChange={(value, e) => this.handleChange(value, e, 'password')}
                   />
                 </CardText>

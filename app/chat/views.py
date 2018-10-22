@@ -15,8 +15,6 @@ from django.shortcuts import redirect
 
 @login_required(login_url='/home/')
 def index(request):
-    if request.user.is_authenticated:
-        print("Fail")
     channel, _ = Channel.objects.get_or_create(channel_name="generic")
     user = request.user
     if not Channel.objects.filter(channel_name="generic", users=user).exists():
