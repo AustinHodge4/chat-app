@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 import {Cell, Avatar, Grid} from 'react-md';
 import {Twemoji} from 'react-emoji-render';
-const Timestamp = require('react-timestamp');
+const moment = require('moment');
 
 class Message extends Component{
     static propTypes = {
@@ -12,7 +12,9 @@ class Message extends Component{
     
     render(){
         const gridStyle = {
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            paddingLeft: '16px', 
+            paddingRight: '8px', 
         }
         const cellStyle = {
             marginTop: '0',
@@ -31,14 +33,14 @@ class Message extends Component{
         }
         const Item = () => (
             <Grid style={gridStyle} noSpacing={true}>
-                <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div><Timestamp className="md-font-light" time={this.props.data.timestamp} precision={2} /></Cell>
+                <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div><div style={{display: 'inline'}} className="md-font-light">{moment(this.props.data.timestamp).fromNow()}</div></Cell>
                 <Cell size={12} align={'top'} style={{fontSize: 'large'}}><Twemoji text={this.props.data.message} /></Cell>
             </Grid>
         );
         return(
             <Grid style={messageBox}>
-                <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.props.data.user.username} />
-                <Cell style={cellStyle} size={this.props.mobile ? 3 : 11}>
+                <Cell style={cellStyle} size={12}>
+                    <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.props.data.user.username} />
                     <Item />
                 </Cell>
             </Grid>

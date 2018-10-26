@@ -24,7 +24,8 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
-        self.groups.remove(self.room_group_name)
+        if self.room_group_name in self.groups:
+            self.groups.remove(self.room_group_name)
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
