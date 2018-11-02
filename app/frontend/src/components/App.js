@@ -394,7 +394,7 @@ class App extends Component{
               drawerTitle="chat-app"
               toolbarId="main-toolbar"
               tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
-              toolbarTitle={channelSelected? '# '+activeChannel.channel_name : "Select a Channel"}
+              toolbarTitle={channelSelected? '# '+activeChannel.channel_name : "Select a Channel or"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}
               onMediaTypeChange={(type, media) => this.onMediaChange(type, media)}
