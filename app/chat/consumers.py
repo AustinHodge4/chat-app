@@ -8,12 +8,17 @@ import json
 class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['channel_name']
-        self.room_group_name = 'chat_%s' % self.room_name
+        channel_url = self.scope['url_route']['kwargs']['channel_url']
+        self.room_name = Channel.objects.get(channel_url=channel_url).channel_name
+        print('chat_%s' % self.room_name)
+        self.room_group_name = 'chat_%s' % self.room_name.replace(" ", "_")
+
         channels = Channel.objects.all()
-        self.groups.extend(['chat_%s' % channel.channel_name for channel in channels])
+        self.groups.extend(['chat_%s' % channel.channel_name.replace(" ", "_") for channel in channels])
+        
         if not self.room_group_name in self.groups:
             self.groups.append(self.room_group_name)
+
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
@@ -105,7 +110,7 @@ class ChatConsumer(WebsocketConsumer):
                             'user': user_json
                         }
                     )
-                self.groups.remove('chat_%s' % channel.channel_name)
+                self.groups.remove('chat_%s' % channel.channel_name.replace(" ", "_"))
                 channel.delete()
         elif message_type == 'add_channel':
             channel_n = text_data_json['channel_name']
@@ -123,12 +128,11 @@ class ChatConsumer(WebsocketConsumer):
                     }
                 )
 
-            if not 'chat_%s' % channel_n in self.groups:
-                self.groups.append('chat_%s' % channel_n)
+            if not 'chat_%s' % channel_n.replace(" ", "_") in self.groups:
+                self.groups.append('chat_%s' % channel_n.replace(" ", "_"))
         print(self.groups)
 
     # Receive message from room group
     def broadcast(self, event):
-        #print(json.dumps(event))
         # Send message to WebSocket
         self.send(text_data=json.dumps(event))

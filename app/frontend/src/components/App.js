@@ -22,8 +22,11 @@ class App extends Component{
             showDeleteChannelDialog: false,
             showChannelUsersDialog: false,
             newChannelName: '',
-            createChannelError: '',
-            createChannelErrorState: false,
+            newChannelTopic: '',
+            createChannelNameError: '',
+            createChannelTopicError: '',
+            createChannelNameErrorState: false,
+            createChannelTopicErrorState: false,
             autocompleteValue: '',
             lastChannelIndex: 1,
             navItems: [
@@ -76,7 +79,7 @@ class App extends Component{
                             active: this.state.activeChannel ? this.state.activeChannel.channel_name === channel.channel_name : false,
                             activeBoxStyle: activeListItemStyle,
                             leftIcon: <FontIcon key={channel.channel_name+"-icon"}>people</FontIcon>,
-                            onClick: (e) => this.onSelectedChannel(e, channel.channel_name),
+                            onClick: (e) => this.onSelectedChannel(e, channel.channel_name, channel.channel_url),
                             primaryText: '# '+channel.channel_name,
                             channel_name: channel.channel_name
                 })
@@ -180,7 +183,7 @@ class App extends Component{
             window.location.href = '../home';
         });
     }
-    onSelectedChannel(e, channel_name){
+    onSelectedChannel(e, channel_name, channel_url){
         const navItems = this.state.navItems;
         let selectedChannel = null;
 
@@ -199,7 +202,7 @@ class App extends Component{
         }
         if(selectedChannel){
             if(selectedChannel.active)
-                change_socket(channel_name+'/');
+                change_socket(channel_url+'/');
             else
                 change_socket("generic/");
             this.setState(prevState => ({navItems: navItems, activeChannel: this.getChannelObject(channel_name), channelSelected: selectedChannel.active, channelAccess: (selectedChannel.active && this.isChannelSubscribed(selectedChannel.channel_name))}));
@@ -222,7 +225,7 @@ class App extends Component{
         this.setState({showCreateChannelDialog: true})
     }
     onCloseCreateChannelDialog(e){
-        this.setState({showCreateChannelDialog: false, newChannelName: ''})
+        this.setState({showCreateChannelDialog: false, newChannelName: '', newChannelTopic: ''})
     }
     onCreateChannel(e){
         function get_cookie(name) {
@@ -238,7 +241,7 @@ class App extends Component{
             return value;
         }
         if(/\S/.test(this.state.newChannelName)){   
-            let payload = {channel_name: this.state.newChannelName, user: this.state.user}
+            let payload = {channel_name: this.state.newChannelName, channel_topic: this.state.newChannelTopic, user: this.state.user}
             fetch(window.location.href+'channels/', {
                 method: 'POST',
                 credentials: "same-origin",
@@ -261,23 +264,29 @@ class App extends Component{
                     chat_socket.send(JSON.stringify({ type: 'add_channel',  user: this.state.user, channel_name: this.state.newChannelName }))
                     console.log("Fetching local")
                     this.fetchChannels().then(done => {
-                        return this.onSelectedChannel(null, data.channel_name);
+                        return this.onSelectedChannel(null, data.channel_name, data.channel_url);
                     });
                     this.setState({showCreateChannelDialog: false, newChannelName: ''})
                 } else {
-                    this.setState({createChannelErrorState: true, createChannelError: data.reason})
+                    if(data.type == 'name_error'){
+                        this.setState({createChannelNameErrorState: true, createChannelNameError: data.reason})
+                    }
+                    if(data.type == 'topic_error'){
+                        this.setState({createChannelTopicErrorState: true, createChannelTopicError: data.reason})
+                    }
                 }
             });
             
         } else {
-            this.setState({createChannelErrorState: true, createChannelError: 'Enter a channel name!'})
+            this.setState({createChannelNameErrorState: true, createChannelNameError: 'Enter a channel name!'})
         }
     }
     onAutoComplete(suggestion, suggestionIndex, matches){
         this.setState({autocompleteValue: ''})
-        change_socket(suggestion+'/');
+        var channel_url = this.state.channels[suggestionIndex].channel_url;
+        change_socket(channel_url+'/');
         if(this.isChannelSubscribed(suggestion))
-            this.onSelectedChannel(null, suggestion)
+            this.onSelectedChannel(null, suggestion, channel_url)
         else
             this.setState({activeChannel: this.getChannelObject(suggestion), channelSelected: true, channelAccess: false})
     }
@@ -347,7 +356,8 @@ class App extends Component{
     render() {
         const {navItems, channelSelected, activeChannel, isLoading, channelAccess, mediaClass, 
             channels, autocompleteValue, showCreateChannelDialog, showDeleteChannelDialog, showChannelUsersDialog,
-            createChannelError, createChannelErrorState, newChannelName, user} = this.state;
+            createChannelNameError,createChannelTopicError, createChannelNameErrorState, createChannelTopicErrorState,
+            newChannelName, newChannelTopic, user} = this.state;
         const divStyle = {
             filter: 'blur(5px)',
             width: '100%',
@@ -362,7 +372,11 @@ class App extends Component{
             position: 'fixed',
         };
         const channelStyle = {
-            fontWeight: '300'
+            fontWeight: '300',
+            textOverflow: 'ellipsis',
+            maxWidth: '85vw',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap'
         }
         const nameStyle = {
             display: 'inline',
@@ -394,7 +408,7 @@ class App extends Component{
               drawerTitle="chat-app"
               toolbarId="main-toolbar"
               tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
-              toolbarTitle={channelSelected? '# '+activeChannel.channel_name : "Select a Channel or"}
+              toolbarTitle={channelSelected? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " Topic: " + activeChannel.topic : "") : "Select a Channel or"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}
               onMediaTypeChange={(type, media) => this.onMediaChange(type, media)}
@@ -430,9 +444,19 @@ class App extends Component{
                     label="Name"
                     placeholder="Channel name"
                     value={newChannelName}
-                    error={createChannelErrorState}
-                    errorText={createChannelError}
-                    onChange={(value, e) => this.setState({newChannelName: value, createChannelError: '', createChannelErrorState: false})}
+                    error={createChannelNameErrorState}
+                    errorText={createChannelNameError}
+                    onChange={(value, e) => this.setState({newChannelName: value, createChannelNameError: '', createChannelNameErrorState: false})}
+                />
+                <TextField
+                    id="channel-topic"
+                    label="Topic"
+                    maxLength={40}
+                    placeholder="Channel Topic"
+                    value={newChannelTopic}
+                    error={createChannelTopicErrorState}
+                    errorText={createChannelTopicError}
+                    onChange={(value, e) => this.setState({newChannelTopic: value, createChannelTopicErrorState: false})}
                 />
             </DialogContainer>
 
@@ -467,7 +491,7 @@ class App extends Component{
                                {channelSelected ? (
                                channelAccess? (<Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
                                                         channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
-                                                        endpoint={window.location.href+activeChannel.channel_name+'/messages?page='} />)
+                                                        endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />)
                                : (
                                 <div>
                                     <Grid style={{display: 'contents'}}>
@@ -478,7 +502,7 @@ class App extends Component{
                                     <div style={divStyle}>
                                         <Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
                                                 channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
-                                                endpoint={window.location.href+activeChannel.channel_name+'/messages?page='} />
+                                                endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />
                                     </div>
                                 </div>
                                )) : null}

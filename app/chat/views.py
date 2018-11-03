@@ -10,7 +10,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
-import json
+import json, re
 from django.shortcuts import redirect
 
 @login_required(login_url='/home/')
@@ -79,25 +79,29 @@ class ChannelView(APIView):
     def post(self, request, format=None):
         data = request.data
         if Channel.objects.filter(channel_name=data['channel_name']):
-            return Response({'success': False, 'reason': 'Channel already exists!'})
+            return Response({'success': False, 'type':'name_error', 'reason': 'Channel already exists!'})
+        if len(data['channel_topic']) > 40:
+            return Response({'success': False, 'type':'topic_error', 'reason': 'Topic must be less than 41 characters!'})
+        if not re.match(r'^[a-zA-Z\d\-_. ]+$', data['channel_name']):
+            return Response({'success': False, 'type':'name_error', 'reason': 'Must contain only these special characters: underscores, hyphens, and periods'})
 
         user = User.objects.get(username=data['user']['username'], password=data['user']['password'], first_name=data['user']['first_name'], last_name=data['user']['last_name'], email=data['user']['email'])
-        new_channel = Channel(channel_name=data['channel_name'], creator=user)
+        new_channel = Channel(channel_name=data['channel_name'], topic=data['channel_topic'], creator=user)
         new_channel.save()
 
         new_channel.users.add(user)
         new_channel.save()
                 
-        return Response({'success': True, 'channel_name': data['channel_name']})
+        return Response({'success': True, 'channel_name': data['channel_name'], 'channel_url': new_channel.channel_url})
 
 class MessageView(APIView):
     renderer_classes = (JSONRenderer, )
     
-    def get(self, request, channel_name, format=None):
+    def get(self, request, channel_url, format=None):
         """
         Return a list of all messages.
         """
-        channel, created = Channel.objects.get_or_create(channel_name=channel_name)
+        channel, created = Channel.objects.get_or_create(channel_url=channel_url)
         print("Created: {}".format(created))
         # We want to show the last 50 messages, ordered most-recent-last
         messages = Message.objects.filter(channel=channel).order_by('-timestamp')

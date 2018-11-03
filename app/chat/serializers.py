@@ -12,7 +12,7 @@ class ChannelSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
     class Meta:
         model = Channel
-        fields = ['channel_name', 'users', 'creator']
+        fields = ['channel_name', 'channel_url', 'topic', 'users', 'creator']
 
 class MessageSerializer(serializers.ModelSerializer):
     channel = ChannelSerializer()
