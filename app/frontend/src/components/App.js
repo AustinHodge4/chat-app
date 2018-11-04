@@ -408,7 +408,7 @@ class App extends Component{
               drawerTitle="chat-app"
               toolbarId="main-toolbar"
               tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
-              toolbarTitle={channelSelected? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " Topic: " + activeChannel.topic : "") : "Select a Channel or"}
+              toolbarTitle={channelSelected && activeChannel != null ? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " Topic: " + activeChannel.topic : "") : "Select a Channel or"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}
               onMediaTypeChange={(type, media) => this.onMediaChange(type, media)}
@@ -488,7 +488,7 @@ class App extends Component{
             </DialogContainer>
             : null}
 
-                               {channelSelected ? (
+                               {channelSelected && activeChannel != null ? (
                                channelAccess? (<Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
                                                         channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
                                                         endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />)
