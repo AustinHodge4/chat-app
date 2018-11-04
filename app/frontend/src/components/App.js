@@ -124,7 +124,7 @@ class App extends Component{
             return response.json();
         })
         .then(data => {
-            console.log(data);
+            //console.log(data);
             let items = this.createNavItem(this.state.subscribedChannels, data.subscribed_channels);
             if(items[0][items[1]+2].key != 'user'){
                 items[0].splice(items[1]+2, 0, {
@@ -166,7 +166,7 @@ class App extends Component{
             return response.json();
         })
         .then(data => {
-            console.log(data);
+            //console.log(data);
             this.setState({user: data}); 
         });
     }
@@ -179,7 +179,7 @@ class App extends Component{
             return response.json();
         })
         .then(data => {
-            console.log(data);
+            //console.log(data);
             window.location.href = '../home';
         });
     }
@@ -259,10 +259,10 @@ class App extends Component{
                 return response.json();
             })
             .then(data => {
-                console.log(data);
+                //console.log(data);
                 if(data.success){
                     chat_socket.send(JSON.stringify({ type: 'add_channel',  user: this.state.user, channel_name: this.state.newChannelName }))
-                    console.log("Fetching local")
+                    //console.log("Fetching local")
                     this.fetchChannels().then(done => {
                         return this.onSelectedChannel(null, data.channel_name, data.channel_url);
                     });
@@ -284,6 +284,7 @@ class App extends Component{
     onAutoComplete(suggestion, suggestionIndex, matches){
         this.setState({autocompleteValue: ''})
         var channel_url = this.state.channels[suggestionIndex].channel_url;
+        console.log("Channing socket to: "+ channel_url);
         change_socket(channel_url+'/');
         if(this.isChannelSubscribed(suggestion))
             this.onSelectedChannel(null, suggestion, channel_url)

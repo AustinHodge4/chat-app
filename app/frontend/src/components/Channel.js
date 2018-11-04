@@ -40,7 +40,7 @@ class Channel extends Component {
     return fetch(this.props.endpoint+""+this.state.page).then(response => {
       return response.json();
     }).then(messages =>{
-      console.log(messages);
+      //console.log(messages);
       if(Object.keys(messages).length != 0){
       this.setState(prevState => ({
         data: prevState.data.concat(messages),
@@ -58,45 +58,57 @@ class Channel extends Component {
     }
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
-      console.log(message);
+      //console.log(message);
       if(message.event == 'message_channel'){
-        console.log("Message:")
-        console.log(message.message);
+        //console.log("Message:")
+        //console.log(message.message);
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
         }))
       }
       else if(message.event == 'join_channel'){
-        console.log("Someone Join")
+        
         if(this.props.user.username == message.user.username){
           this.props.joinCallback(message.channel_name);
           console.log("You Join");
         } else {
+          console.log("Someone Join")
           this.props.leaveCallback(false);
         }
       }
       else if(message.event == 'leave_channel' ){
-        console.log("Someone Leave")
+        
         if(this.props.user.username == message.user.username){
           this.props.leaveCallback(true);
           console.log("You Leave")
         } else {
+          console.log("Someone Left")
           this.props.leaveCallback(false);
         }
       }
       else if(message.event == 'delete_channel'){
-        console.log("Somone Delete Channel")
+       
         if(this.props.channel){
-          if(this.props.channel.channel_name == message.channel_name)
+          if(this.props.channel.channel_name == message.channel_name){
+            console.log("You Deleted Channel")
             this.props.leaveCallback(true);
-          else
+          }
+          else{
+            console.log("Somone Delete Channel")
             this.props.leaveCallback(false);
+          }
         }
       }
       else if(message.event == 'add_channel'){
-        console.log("Someone Add Channel")
-        if(this.props.user.username != message.user.username)
+       
+        if(this.props.user.username != message.user.username){
+          console.log("Someone Add Channel")
           this.props.leaveCallback(false);
+        }
+        else{
+          console.log("You Add Channel")
+        }
+
       }
     }.bind(this)
 
@@ -109,7 +121,7 @@ class Channel extends Component {
       })
       .then(data => {
         this.setState({ data: data, loaded: true }); 
-        console.log(data);
+        //console.log(data);
         this.scrollDown(this.refs['scroll-box']);
       });
       

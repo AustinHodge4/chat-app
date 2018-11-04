@@ -27,15 +27,16 @@ class ChatConsumer(WebsocketConsumer):
         if channel_url == 'generic':
             user = UserSerializer(self.scope['user'])
             for group in self.groups:
-                async_to_sync(self.channel_layer.group_send)(
-                    group,
-                    {
-                        'type': 'broadcast',
-                        'event': 'join_channel',
-                        'channel_name': 'generic',
-                        'user': user.data
-                    }
-                )
+                if not 'generic' in group:
+                    async_to_sync(self.channel_layer.group_send)(
+                        group,
+                        {
+                            'type': 'broadcast',
+                            'event': 'join_channel',
+                            'channel_name': 'generic',
+                            'user': user.data
+                        }
+                    )
 
         self.accept()
 
