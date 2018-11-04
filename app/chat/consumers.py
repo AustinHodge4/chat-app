@@ -25,6 +25,7 @@ class ChatConsumer(WebsocketConsumer):
             self.channel_name
         )
         if channel_url == 'generic':
+            user = UserSerializer(self.scope['user'])
             for group in self.groups:
                 async_to_sync(self.channel_layer.group_send)(
                     group,
@@ -32,7 +33,7 @@ class ChatConsumer(WebsocketConsumer):
                         'type': 'broadcast',
                         'event': 'join_channel',
                         'channel_name': 'generic',
-                        'user': self.scope['user']
+                        'user': user.data
                     }
                 )
 
