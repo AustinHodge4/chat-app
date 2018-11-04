@@ -5,3 +5,4 @@ app/db.sqlite3
 db.sqlite3
 __pycache__
 webpack_stats.json
+local_settings.py
