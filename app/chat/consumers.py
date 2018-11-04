@@ -24,6 +24,17 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        if channel_url == 'generic':
+            for group in self.groups:
+                async_to_sync(self.channel_layer.group_send)(
+                    group,
+                    {
+                        'type': 'broadcast',
+                        'event': 'join_channel',
+                        'channel_name': 'generic',
+                        'user': self.scope['user']
+                    }
+                )
 
         self.accept()
 
