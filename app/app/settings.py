@@ -25,7 +25,7 @@ SECRET_KEY = 'u31vayzox_@dg@r8o_k@sp4izd55(m7o81t3%0uh+vqe&w2gns'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.herokuapp.com']
 
 ASGI_APPLICATION = 'app.routing.application'
 CHANNEL_LAYERS = {
