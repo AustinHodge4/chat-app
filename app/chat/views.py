@@ -4,6 +4,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 from chat.models import Channel, Message
 from chat.serializers import ChannelSerializer, MessageSerializer, UserSerializer
 from rest_framework import generics
@@ -14,6 +15,7 @@ import json, re
 from django.shortcuts import redirect
 
 @login_required(login_url='/home/')
+@ensure_csrf_cookie
 def index(request):
     channel, _ = Channel.objects.get_or_create(channel_name="generic")
     user = request.user
@@ -22,7 +24,7 @@ def index(request):
         channel.save()
 
     return render(request, 'index.html')
-
+@ensure_csrf_cookie
 def loginuser(request):
     if request.method == 'POST':
         # login user
@@ -40,6 +42,7 @@ def loginuser(request):
             return JsonResponse({'success': False, 'error_message': 'Failed to login!'})
     else:
         return render(request, 'login.html')
+
 def logoutuser(request):
     logout(request)
     return JsonResponse({'success': True})
