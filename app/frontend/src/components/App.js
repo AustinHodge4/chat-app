@@ -266,7 +266,7 @@ class App extends Component{
                     this.fetchChannels().then(done => {
                         return this.onSelectedChannel(null, data.channel_name, data.channel_url);
                     });
-                    this.setState({showCreateChannelDialog: false, newChannelName: ''})
+                    this.setState({showCreateChannelDialog: false, newChannelName: '', newChannelTopic: '', createChannelTopicErrorState: false})
                 } else {
                     if(data.type == 'name_error'){
                         this.setState({createChannelNameErrorState: true, createChannelNameError: data.reason})
@@ -322,7 +322,7 @@ class App extends Component{
             if(local){
                 this.setState({channelSelected: false, channelAccess: false, activeChannel: null, showDeleteChannelDialog: false});
             } else {
-                this.setState(prevState => ({activeChannel: this.getChannelObject(prevState.activeChannel.channel_name)}));
+                this.setState(prevState => ({activeChannel: (prevState.channel != null ? this.getChannelObject(prevState.activeChannel.channel_name) : null)}));
             }
         });
     }
