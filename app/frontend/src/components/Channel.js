@@ -67,7 +67,9 @@ class Channel extends Component {
         }))
       }
       else if(message.event == 'join_channel'){
-        
+        if(message.channel_name != this.props.channel.channel_name)
+          return;
+
         if(this.props.user.username == message.user.username){
           this.props.joinCallback(message.channel_name);
           console.log("You Join");
@@ -77,7 +79,9 @@ class Channel extends Component {
         }
       }
       else if(message.event == 'leave_channel' ){
-        
+         if(message.channel_name != this.props.channel.channel_name)
+          return;
+          
         if(this.props.user.username == message.user.username){
           this.props.leaveCallback(true);
           console.log("You Leave")
@@ -89,7 +93,7 @@ class Channel extends Component {
       else if(message.event == 'delete_channel'){
        
         if(this.props.channel){
-          if(this.props.channel.channel_name == message.channel_name){
+          if(this.props.channel.channel_name == message.channel_name && this.props.user.username == message.user.username){
             console.log("You Deleted Channel")
             this.props.leaveCallback(true);
           }
