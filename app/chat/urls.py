@@ -1,8 +1,9 @@
 from django.urls import path
-from chat.views import index, loginuser, logoutuser, MessageView, ChannelView, UserView
+from chat.views import index, loginuser,registeruser, logoutuser, MessageView, ChannelView, UserView
 
 urlpatterns = [
     path('home/', loginuser),
+    path('register/', registeruser),
     path('api/', index),
     path('api/logout/',logoutuser),
     path('api/user/', UserView.as_view()),
