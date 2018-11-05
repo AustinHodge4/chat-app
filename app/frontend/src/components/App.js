@@ -322,7 +322,7 @@ class App extends Component{
             if(local){
                 this.setState({channelSelected: false, channelAccess: false, activeChannel: null, showDeleteChannelDialog: false});
             } else {
-                this.setState(prevState => ({activeChannel: (prevState.channel != null ? this.getChannelObject(prevState.activeChannel.channel_name) : null)}));
+                this.setState(prevState => ({activeChannel: (prevState.activeChannel != null ? this.getChannelObject(prevState.activeChannel.channel_name) : null)}));
             }
         });
     }
