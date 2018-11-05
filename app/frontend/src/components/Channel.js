@@ -58,7 +58,7 @@ class Channel extends Component {
     }
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
-      //console.log(message);
+      console.log(message);
       if(message.event == 'message_channel'){
         //console.log("Message:")
         //console.log(message.message);

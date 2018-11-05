@@ -393,9 +393,9 @@ class App extends Component{
                 className={'md-btn md-btn--icon md-btn--hover md-pointer--hover md-inline-block md-btn--toolbar md-toolbar--action-right'}
                 menuItems={[
                     <ListItem key={1} onClick={(e) => this.onOpenChannelUsersDialog(e)} primaryText="View People" />,
-                        (activeChannel.creator != null) && (user.username == activeChannel.creator.username) ? 
+                        (activeChannel != null) && (activeChannel.creator != null) && (user.username == activeChannel.creator.username) ? 
                         <ListItem key={2} onClick={(e) => this.onOpenDeleteChannelDialog(e)} primaryText="Delete Channel" /> :
-                        (activeChannel.creator != null) ? <ListItem key={2} onClick={(e) => this.onButtonClick(e, "Leave")} primaryText="Leave Channel" /> : <div key={2}></div>
+                        (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={2} onClick={(e) => this.onButtonClick(e, "Leave")} primaryText="Leave Channel" /> : <div key={2}></div>
                 ]}        
                 position={Layover.Positions.BOTTOM_RIGHT}     
                 >
