@@ -406,7 +406,7 @@ class App extends Component{
             isLoading ? "Loading" : (
             <NavigationDrawer
               drawerId="main-navigation"
-              drawerTitle="chat-app"
+              drawerTitle="Lets Talk About It"
               toolbarId="main-toolbar"
               tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
               toolbarTitle={channelSelected && activeChannel != null ? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " Topic: " + activeChannel.topic : "") : "Select a Channel or"}
