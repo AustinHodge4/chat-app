@@ -84,6 +84,11 @@ class Form extends Component {
                 lineDirection={'right'}
                 rightIcon={<Buttons />}
                 onChange={(value, e) => this.handleChange(value, e)}
+                onKeyPress={ (event) => {
+                  if (event.key === 'Enter') {
+                    this.handleSubmit(event);
+                  }
+                }}
                 value={this.state.message}
                 disabled={this.state.disable}
                 style={textStyle}
