@@ -283,10 +283,7 @@ class App extends Component{
     }
     onAutoComplete(suggestion, suggestionIndex, matches){
         this.setState({autocompleteValue: ''})
-        console.log(matches);
-        console.log(this.state.channels);
-        console.log(suggestionIndex);
-        var channel_url = this.state.channels[suggestionIndex].channel_url;
+        var channel_url = matches[suggestionIndex].channel_url;
         console.log("Channing socket to: "+ channel_url);
         change_socket(channel_url+'/');
         if(this.isChannelSubscribed(suggestion))
