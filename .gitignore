@@ -6,3 +6,4 @@ db.sqlite3
 __pycache__
 webpack_stats.json
 local_settings.py
+app/app/local_settings.py
