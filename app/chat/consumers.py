@@ -59,9 +59,7 @@ class ChatConsumer(WebsocketConsumer):
         channel_name = self.room_name
         channel = Channel.objects.get(channel_name=channel_name)
 
-
-        print(message_type)
-        if message_type == 'message_event':
+        if message_type == 'message_channel':
             message = text_data_json['message']
             
             print("User: {}".format(user))
@@ -81,8 +79,10 @@ class ChatConsumer(WebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'broadcast',
-                    'event': 'message_channel',
+                    'event': message_type,
                     'message': serializer.data,
+                    'user': user_json,
+                    'channel_name': channel_name
                 }
             )
         elif message_type == 'join_channel':
@@ -93,11 +93,21 @@ class ChatConsumer(WebsocketConsumer):
                     self.room_group_name,
                     {
                         'type': 'broadcast',
-                        'event': 'join_channel',
-                        'channel_name': self.room_name,
+                        'event': message_type,
+                        'channel_name': channel_name,
                         'user': user_json
                     }
                 )
+        elif message_type == 'change_topic':
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'broadcast',
+                    'event': message_type,
+                    'channel_name': channel_name,
+                    'user': user_json
+                }
+            )
         elif message_type == 'leave_channel':
             if user in channel.users.all():
                 channel.users.remove(user)
@@ -106,8 +116,8 @@ class ChatConsumer(WebsocketConsumer):
                     self.room_group_name,
                     {
                         'type': 'broadcast',
-                        'event': 'leave_channel',
-                        'channel_name': self.room_name,
+                        'event': message_type,
+                        'channel_name': channel_name,
                         'user': user_json
                     }
                 )
@@ -118,8 +128,8 @@ class ChatConsumer(WebsocketConsumer):
                         group,
                         {
                             'type': 'broadcast',
-                            'event': 'delete_channel',
-                            'channel_name': self.room_name,
+                            'event': message_type,
+                            'channel_name': channel_name,
                             'user': user_json
                         }
                     )
@@ -135,8 +145,8 @@ class ChatConsumer(WebsocketConsumer):
                     group,
                     {
                         'type': 'broadcast',
-                        'event': 'add_channel',
-                        'channel_name': self.room_name,
+                        'event': message_type,
+                        'channel_name': channel_name,
                         'user': user_json
                     }
                 )

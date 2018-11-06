@@ -43,7 +43,7 @@ class Form extends Component {
     const {message} = this.state;
     if(/\S/.test(message)){    
       this.setState({'message': ''});
-      const message_data = { type: 'message_event', user: this.props.user, message: message };
+      const message_data = { type: 'message_channel', user: this.props.user, message: message };
       chat_socket.send(JSON.stringify(message_data));
     }
   };

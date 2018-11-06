@@ -60,8 +60,6 @@ class Channel extends Component {
       var message = JSON.parse(m.data);
       console.log(message);
       if(message.event == 'message_channel'){
-        //console.log("Message:")
-        //console.log(message.message);
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
         }))
@@ -75,6 +73,18 @@ class Channel extends Component {
           console.log("You Join");
         } else {
           console.log("Someone Join")
+          this.props.leaveCallback(false);
+        }
+      }
+      else if(message.event == 'change_topic'){
+        if(message.channel_name != this.props.channel.channel_name)
+          return;
+
+        if(this.props.user.username == message.user.username){
+          this.props.leaveCallback(false);
+          console.log("You Change Topic");
+        } else {
+          console.log("Someone Change Topic")
           this.props.leaveCallback(false);
         }
       }

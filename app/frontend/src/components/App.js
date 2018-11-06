@@ -7,6 +7,18 @@ import { NavigationDrawer, Autocomplete, DialogContainer,
     TextField,  FontIcon, Button, Grid, Cell, MenuButton, ListItem,
     Layover, List, ListItemControl, Avatar} from 'react-md';
 
+function get_cookie(name) {
+    var value;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(function (c) {
+            var m = c.trim().match(/(\w+)=(.*)/);
+            if(m !== undefined && m[1] == name) {
+                value = decodeURIComponent(m[2]);
+            }
+        });
+    }
+    return value;
+}
 class App extends Component{
     constructor(props){
         super(props);
@@ -21,12 +33,16 @@ class App extends Component{
             showCreateChannelDialog: false,
             showDeleteChannelDialog: false,
             showChannelUsersDialog: false,
+            showChannelTopicDialog: false,
             newChannelName: '',
             newChannelTopic: '',
+            changeChannelTopic: '',
             createChannelNameError: '',
             createChannelTopicError: '',
+            changeChannelTopicError: '',
             createChannelNameErrorState: false,
             createChannelTopicErrorState: false,
+            changeChannelTopicErrorState: false,
             autocompleteValue: '',
             lastChannelIndex: 1,
             navItems: [
@@ -225,23 +241,18 @@ class App extends Component{
         this.setState({showCreateChannelDialog: true})
     }
     onCloseCreateChannelDialog(e){
-        this.setState({showCreateChannelDialog: false, newChannelName: '', newChannelTopic: ''})
+        this.setState({showCreateChannelDialog: false, newChannelName: '', newChannelTopic: '', createChannelNameErrorState: false, createChannelTopicErrorState: false})
+    }
+    onOpenChannelTopicDialog(e){
+        this.setState({showChannelTopicDialog: true})
+    }
+    onCloseChannelTopicDialog(e){
+        this.setState({showChannelTopicDialog: false, changeChannelTopic: '', changeChannelTopicErrorState: false})
     }
     onCreateChannel(e){
-        function get_cookie(name) {
-            var value;
-            if (document.cookie && document.cookie !== '') {
-                document.cookie.split(';').forEach(function (c) {
-                    var m = c.trim().match(/(\w+)=(.*)/);
-                    if(m !== undefined && m[1] == name) {
-                        value = decodeURIComponent(m[2]);
-                    }
-                });
-            }
-            return value;
-        }
+        
         if(/\S/.test(this.state.newChannelName)){   
-            let payload = {channel_name: this.state.newChannelName, channel_topic: this.state.newChannelTopic, user: this.state.user}
+            let payload = {type: 'create', channel_name: this.state.newChannelName.trim(), channel_topic: this.state.newChannelTopic.trim(), user: this.state.user}
             fetch(window.location.href+'channels/', {
                 method: 'POST',
                 credentials: "same-origin",
@@ -280,6 +291,36 @@ class App extends Component{
         } else {
             this.setState({createChannelNameErrorState: true, createChannelNameError: 'Enter a channel name!'})
         }
+    }
+    onChangeChannelTopic(e){
+        let payload = {type: 'change_topic', channel_name: this.state.activeChannel.channel_name, channel_topic: this.state.changeChannelTopic.trim(), user: this.state.user}
+        fetch(window.location.href+'channels/', {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: {
+                "X-CSRFToken": get_cookie('csrftoken'),
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (response.status !== 200) {
+                return this.setState({ placeholder: "Fail to change topic" });
+            }
+            return response.json();
+        })
+        .then(data => {
+            //console.log(data);
+            if(data.success){
+                chat_socket.send(JSON.stringify({ type: 'change_topic', channel_name: this.state.activeChannel.channel_name, user: this.state.user }))
+                this.setState({showChannelTopicDialog: false, changeChannelTopic: '', changeChannelTopicErrorState: false})
+            } else {
+                if(data.type == 'topic_error'){
+                    this.setState({changeChannelTopicErrorState: true, changeChannelTopicError: data.reason})
+                }
+            }
+        });
     }
     onAutoComplete(suggestion, suggestionIndex, matches){
         this.setState({autocompleteValue: ''})
@@ -356,9 +397,12 @@ class App extends Component{
     }
     render() {
         const {navItems, channelSelected, activeChannel, isLoading, channelAccess, mediaClass, 
-            channels, autocompleteValue, showCreateChannelDialog, showDeleteChannelDialog, showChannelUsersDialog,
-            createChannelNameError,createChannelTopicError, createChannelNameErrorState, createChannelTopicErrorState,
-            newChannelName, newChannelTopic, user} = this.state;
+            channels, autocompleteValue, 
+            showCreateChannelDialog, showDeleteChannelDialog, showChannelUsersDialog, showChannelTopicDialog,
+            createChannelNameError,createChannelTopicError, changeChannelTopicError, 
+            createChannelNameErrorState, createChannelTopicErrorState, changeChannelTopicErrorState,
+            newChannelName, newChannelTopic, changeChannelTopic,
+             user} = this.state;
         const divStyle = {
             filter: 'blur(5px)',
             width: '100%',
@@ -393,9 +437,13 @@ class App extends Component{
                 className={'md-btn md-btn--icon md-btn--hover md-pointer--hover md-inline-block md-btn--toolbar md-toolbar--action-right'}
                 menuItems={[
                     <ListItem key={1} onClick={(e) => this.onOpenChannelUsersDialog(e)} primaryText="View People" />,
-                        (activeChannel != null) && (activeChannel.creator != null) && (user.username == activeChannel.creator.username) ? 
-                        <ListItem key={2} onClick={(e) => this.onOpenDeleteChannelDialog(e)} primaryText="Delete Channel" /> :
-                        (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={2} onClick={(e) => this.onButtonClick(e, "Leave")} primaryText="Leave Channel" /> : <div key={2}></div>
+
+                    (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={3} onClick={(e) => this.onOpenChannelTopicDialog(e)} primaryText="Change Topic" /> : <div key={3}></div>,
+
+                    (activeChannel != null) && (activeChannel.creator != null) && (user.username == activeChannel.creator.username) ? 
+                    <ListItem key={2} onClick={(e) => this.onOpenDeleteChannelDialog(e)} primaryText="Delete Channel" /> :
+                    (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={2} onClick={(e) => this.onButtonClick(e, "Leave")} primaryText="Leave Channel" /> : <div key={2}></div>
+
                 ]}        
                 position={Layover.Positions.BOTTOM_RIGHT}     
                 >
@@ -451,13 +499,13 @@ class App extends Component{
                 />
                 <TextField
                     id="channel-topic"
-                    label="Topic"
+                    label="Topic (optional)"
                     maxLength={40}
                     placeholder="Channel Topic"
                     value={newChannelTopic}
                     error={createChannelTopicErrorState}
                     errorText={createChannelTopicError}
-                    onChange={(value, e) => this.setState({newChannelTopic: value, createChannelTopicErrorState: false})}
+                    onChange={(value, e) => this.setState({newChannelTopic: value, createChannelTopicErrorState: false, createChannelTopicError: ''})}
                 />
             </DialogContainer>
 
@@ -486,6 +534,29 @@ class App extends Component{
                         leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+user.username} />}
                     />)}
                 </List>
+            </DialogContainer>
+            : null}
+
+            {activeChannel != null ? 
+            <DialogContainer
+                id="channel_topic_dialog"
+                visible={showChannelTopicDialog}
+                onHide={(e) => {(this.onCloseChannelTopicDialog(e))}}
+                actions={[<Button flat primary onClick={(e) => this.onChangeChannelTopic(e)}>Change</Button>]}
+                title={"Topic"}
+                aria-describedby="speed-boost-description"
+            >
+                <p id="speed-boost-description" className="md-color--secondary-text">{activeChannel.topic}</p>
+                <TextField
+                    id="channel-topic"
+                    label="Change Topic"
+                    maxLength={40}
+                    placeholder="Channel Topic"
+                    value={changeChannelTopic}
+                    error={changeChannelTopicErrorState}
+                    errorText={changeChannelTopicError}
+                    onChange={(value, e) => this.setState({changeChannelTopic: value, changeChannelTopicErrorState: false, changeChannelTopicError: ''})}
+                />
             </DialogContainer>
             : null}
 
