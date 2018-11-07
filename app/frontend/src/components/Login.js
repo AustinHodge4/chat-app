@@ -1,9 +1,21 @@
  import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
-import { Card, CardTitle, CardText, CardActions, Toolbar, Divider, Button, TextField, FontIcon, Grid, DialogContainer, Cell} from 'react-md';
+import { Card, CardTitle, CardText, CardActions, 
+  Toolbar, Button, TextField, FontIcon, Grid, 
+  DialogContainer, Cell, Snackbar} from 'react-md';
 
-
+function get_cookie(name) {
+  var value;
+  if (document.cookie && document.cookie !== '') {
+      document.cookie.split(';').forEach(function (c) {
+          var m = c.trim().match(/(\w+)=(.*)/);
+          if(m !== undefined && m[1] == name) {
+              value = decodeURIComponent(m[2]);
+          }
+      });
+  }
+  return value;
+}
 class Login extends Component {
   constructor(props){
     super(props);
@@ -14,6 +26,8 @@ class Login extends Component {
     last_name:'',
     email:'',
     showCreateUserDialog: false,
+    toasts: [],
+    autoHide: true,
     isLoading: true
     }
    }
@@ -26,23 +40,58 @@ class Login extends Component {
   onOpenCreateUserDialog(e){
     this.setState({showCreateUserDialog: true});
   }
+  addToast = (text, autohide = true) => {
+    this.setState((state) => {
+      const toasts = state.toasts.slice();
+      toasts.push({ text });
+      return { toasts, autohide };
+    });
+  };
+  dismissToast = () => {
+    const [, ...toasts] = this.state.toasts;
+    this.setState({ toasts });
+  };
+  handleRegisteration = e => {
+    console.log('Registered!')
+    e.preventDefault();
+    const {username, password, first_name, last_name, email} = this.state; 
+    if(/\S/.test(username) && /\S/.test(password)){  
+      let payload = {type: "register", username: this.state.username, password: this.state.password, first_name: this.state.first_name, last_name: this.state.last_name, email: this.state.email}
+      fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            "X-CSRFToken": get_cookie('csrftoken'),
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }).then(response => {
+          if (response.status !== 200) {
+              return this.setState({ placeholder: "Fail to register" });
+          }
+          return response.json();
+      })
+      .then(data => {
+          console.log(data);
+          if(data.success){
+            this.setState({showCreateUserDialog: false});
+            this.addToast('Account Created!');
+          } else {
+            console.log(data.error_message);      
+          }
+      });
+    }
+      else {
+        (console.log('No userName and paaswprd'))
+      }
+    }
+
   handleSubmit = e => {
     e.preventDefault();
-    function get_cookie(name) {
-      var value;
-      if (document.cookie && document.cookie !== '') {
-          document.cookie.split(';').forEach(function (c) {
-              var m = c.trim().match(/(\w+)=(.*)/);
-              if(m !== undefined && m[1] == name) {
-                  value = decodeURIComponent(m[2]);
-              }
-          });
-      }
-      return value;
-    }
+    
     const {username, password} = this.state;
     if(/\S/.test(username) && /\S/.test(password)){  
-      let payload = {username: this.state.username, password: this.state.password}  
+      let payload = {type: "login", username: this.state.username, password: this.state.password}  
       fetch(window.location.href, {
         method: 'POST',
         headers: {
@@ -68,10 +117,7 @@ class Login extends Component {
     }
   };
   render() {
-    const {isLoading, showCreateUserDialog} = this.state;
-    const card_title_style = {
-      textAlign: 'center',
-     };
+    const {isLoading, showCreateUserDialog, toasts, autohide} = this.state;
 
       return (
         isLoading == false ? null : (
@@ -119,10 +165,9 @@ class Login extends Component {
               title="New User Registeration"
               titleId="simple-full-page-dialog-title"
               nav={<Button icon onClick={(e) => this.onCloseCreateUserDialog(e)}>close</Button>}
-              actions={<Button type="submit" primary  flat onClick={this.hide}>Register</Button>}
+              actions={<Button type="submit" primary  flat onClick={this.handleRegisteration}>Register</Button>}
             />
                 <section className="md-toolbar-relative" style={{paddingLeft: '32px', paddingRight: '32px'}}>
-                <form onSubmit={this.handleSubmit}>
                 <TextField
                     id="user_name"
                     label="Username"
@@ -164,12 +209,17 @@ class Login extends Component {
                     required
                     onChange={(value, e) => this.handleChange(value, e, 'password')}
                   />
-           
-              </form>
               </section>
             </DialogContainer>
             </Cell>
+            <Snackbar
+              id="example-snackbar"
+              toasts={toasts}
+              autohide={autohide}
+              onDismiss={this.dismissToast}
+            />`
           </Grid>
+          
         )
       );
     }

@@ -27,10 +27,15 @@ def index(request):
 @ensure_csrf_cookie
 def loginuser(request):
     if request.method == 'POST':
-        # login user
         payload = json.loads(request.body)
         username = payload['username']
         password = payload['password']
+        # login user
+        if payload['type'] == 'register':
+            firstname = payload['first_name']
+            lastname = payload['last_name']
+            email = payload['email']
+            User.objects.create_user(username=username, first_name=firstname, last_name=lastname, email=email, password=password)
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -58,7 +63,7 @@ class UserView(APIView):
         return Response(user_serializer.data)
 def registeruser(request):
     if request.method == 'POST':
-        # login user
+        # register user
         payload = json.loads(request.body)
         username = payload['username']
         firstname = payload['first_name']
