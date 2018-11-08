@@ -174,7 +174,7 @@ class App extends Component{
         return false;
     }
     fetchUser(){
-        fetch(window.location.href+'user')
+        return fetch(window.location.href+'user')
         .then(response => {
             if (response.status !== 200) {
                 return this.setState({ placeholder: "User not found" });
@@ -392,8 +392,9 @@ class App extends Component{
                 this.fetchChannels();
             }
         }.bind(this)
-        this.fetchUser();
-        this.fetchChannels();
+        this.fetchUser().then(()=> {
+            this.fetchChannels();
+        });
     }
     render() {
         const {navItems, channelSelected, activeChannel, isLoading, channelAccess, mediaClass, 
@@ -470,7 +471,6 @@ class App extends Component{
                                                             dataLabel={'channel_name'}
                                                             dataValue={'channel_name'}
                                                             toolbar
-                                                            type='search'
                                                             value={autocompleteValue}
                                                             filter={Autocomplete.caseInsensitiveFilter}
                                                             style={{marginLeft: '32px', maxWidth: '300px'}}

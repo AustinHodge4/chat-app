@@ -38,7 +38,7 @@ class Login extends Component {
     this.setState({showCreateUserDialog: false, username: '', password: ''});
   }
   onOpenCreateUserDialog(e){
-    this.setState({showCreateUserDialog: true, username: '', password: ''});
+    this.setState({showCreateUserDialog: true, username: '', password: '', first_name: '', last_name: '', email: ''});
   }
   addToast = (text, autohide = true) => {
     this.setState((state) => {
@@ -59,7 +59,7 @@ class Login extends Component {
     this.setState(prev => ({username: prev.username.trim(), password: prev.password.trim(),
       first_name: prev.first_name.trim(),last_name: prev.last_name.trim(),email: prev.email.trim()}), 
       ()=> {
-        
+
       const {username, password, first_name, last_name, email} = this.state;
       if(type == 'login'){
         let login_form = document.getElementById("login_form");
@@ -178,7 +178,7 @@ class Login extends Component {
                 id="register_dialog"
                 visible={showCreateUserDialog}
                 onHide={(e) => {(this.onCloseCreateUserDialog(e))}}
-                title="Register"
+                aria-labelledby="register-toolbar"
                 fullPage
             >
             <Toolbar
