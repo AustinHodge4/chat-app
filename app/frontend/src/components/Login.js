@@ -31,14 +31,14 @@ class Login extends Component {
     isLoading: true
     }
    }
-  handleChange(value, e, type){
+  handleChange(e, type, value){
     this.setState({[type]: value});
   };
   onCloseCreateUserDialog(e){
-    this.setState({showCreateUserDialog: false});
+    this.setState({showCreateUserDialog: false, username: '', password: ''});
   }
   onOpenCreateUserDialog(e){
-    this.setState({showCreateUserDialog: true});
+    this.setState({showCreateUserDialog: true, username: '', password: ''});
   }
   addToast = (text, autohide = true) => {
     this.setState((state) => {
@@ -51,79 +51,93 @@ class Login extends Component {
     const [, ...toasts] = this.state.toasts;
     this.setState({ toasts });
   };
-  handleRegisteration = e => {
-    console.log('Registered!')
-    e.preventDefault();
-    const {username, password, first_name, last_name, email} = this.state; 
-    if(/\S/.test(username) && /\S/.test(password)){  
-      let payload = {type: "register", username: this.state.username, password: this.state.password, first_name: this.state.first_name, last_name: this.state.last_name, email: this.state.email}
-      fetch(window.location.href, {
-        method: 'POST',
-        headers: {
-            "X-CSRFToken": get_cookie('csrftoken'),
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }).then(response => {
-          if (response.status !== 200) {
-              return this.setState({ placeholder: "Fail to register" });
-          }
-          return response.json();
-      })
-      .then(data => {
-          console.log(data);
-          if(data.success){
-            this.setState({showCreateUserDialog: false});
-            this.addToast('Account Created!');
-          } else {
-            console.log(data.error_message);      
-          }
-      });
-    }
-      else {
-        (console.log('No userName and paaswprd'))
-      }
-    }
 
-  handleSubmit = e => {
+
+  handleSubmit = (e, type) => {
     e.preventDefault();
-    
-    const {username, password} = this.state;
-    if(/\S/.test(username) && /\S/.test(password)){  
-      let payload = {type: "login", username: this.state.username, password: this.state.password}  
-      fetch(window.location.href, {
-        method: 'POST',
-        headers: {
-            "X-CSRFToken": get_cookie('csrftoken'),
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }).then(response => {
-          if (response.status !== 200) {
-              return this.setState({ placeholder: "Fail to login" });
-          }
-          return response.json();
-      })
-      .then(data => {
-          console.log(data);
-          if(data.success){
-              window.location.href = '../api';
-          } else {
-            console.log(data.error_message);      
-          }
-      });
-    }
+
+    this.setState(prev => ({username: prev.username.trim(), password: prev.password.trim(),
+      first_name: prev.first_name.trim(),last_name: prev.last_name.trim(),email: prev.email.trim()}), 
+      ()=> {
+        
+      const {username, password, first_name, last_name, email} = this.state;
+      if(type == 'login'){
+        let login_form = document.getElementById("login_form");
+        if(login_form.checkValidity()) {
+          let payload = {type: type, username: username, password: password} 
+          
+          fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                "X-CSRFToken": get_cookie('csrftoken'),
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          }).then(response => {
+              if (response.status !== 200) {
+                  this.addToast('Unexpected fail to login');
+                  return null;
+              }
+              return response.json();
+          })
+          .then(data => {
+              if(data.success){
+                  window.location.href = '../api';
+              } else {
+                this.addToast(data.error_message);     
+              }
+          });
+        }
+        else {
+          login_form.reportValidity();
+        }
+      }
+      else if(type == 'register'){
+        let register_form = document.getElementById("register_form");
+        if(register_form.checkValidity()) {
+          let payload = {type: type, username: username, password: password, 
+            first_name: first_name, last_name: last_name, email: email};
+
+          fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                "X-CSRFToken": get_cookie('csrftoken'),
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          }).then(response => {
+              if (response.status !== 200) {
+                this.addToast('Unexpected fail to register');
+                return null;
+              }
+              return response.json();
+          })
+          .then(data => {
+              if(data.success){
+                this.setState({showCreateUserDialog: false});
+                this.addToast('Account Created!');
+              } else {
+                this.addToast(data.error_message);      
+              }
+          });
+        }
+        else {
+            register_form.reportValidity();
+        }
+          
+      }
+    });
   };
   render() {
     const {isLoading, showCreateUserDialog, toasts, autohide} = this.state;
 
       return (
         isLoading == false ? null : (
-          <Grid className="grid-example">
+          <Grid>
             <Cell size={12} tabletSize={6} tabletOffset={1} desktopOffset={3} desktopSize={6}>
-            <form onSubmit={this.handleSubmit}>
+            <form id="login_form" onSubmit={(e) => this.handleSubmit(e, 'login')}>
               <Card className="md-block-centered">
                 <CardTitle title="Welcome to Chat-app" subtitle="Login or Register" />
                 <CardText>
@@ -133,8 +147,9 @@ class Login extends Component {
                     type="text"
                     leftIcon={<FontIcon>account_box</FontIcon>}
                     required
+                    value={this.state.username}
                     autoComplete={'username'}
-                    onChange={(value, e) => this.handleChange(value, e, 'username')}
+                    onChange={(value, e) => this.handleChange(e, 'username', value)}
                   />
                   <TextField
                     id="password"
@@ -142,8 +157,9 @@ class Login extends Component {
                     type="password"
                     leftIcon={<FontIcon>lock</FontIcon>}
                     required
+                    value={this.state.password}
                     autoComplete={'current-password'}
-                    onChange={(value, e) => this.handleChange(value, e, 'password')}
+                    onChange={(value, e) => this.handleChange(e, 'password', value)}
                   />
                 </CardText>
                 <CardActions>
@@ -152,8 +168,14 @@ class Login extends Component {
                 </CardActions>
               </Card>
               </form>
+              <Snackbar
+              id="response-snackbar"
+              toasts={toasts}
+              autohide={autohide}
+              onDismiss={this.dismissToast}
+            />
               <DialogContainer
-                id="create_channel_dialog"
+                id="register_dialog"
                 visible={showCreateUserDialog}
                 onHide={(e) => {(this.onCloseCreateUserDialog(e))}}
                 title="Register"
@@ -163,34 +185,38 @@ class Login extends Component {
               fixed
               colored
               title="New User Registeration"
-              titleId="simple-full-page-dialog-title"
+              titleId="register-toolbar"
               nav={<Button icon onClick={(e) => this.onCloseCreateUserDialog(e)}>close</Button>}
-              actions={<Button type="submit" primary  flat onClick={this.handleRegisteration}>Register</Button>}
+              actions={<Button type="submit" primary  flat onClick={(e) => this.handleSubmit(e, 'register')}>Register</Button>}
             />
                 <section className="md-toolbar-relative" style={{paddingLeft: '32px', paddingRight: '32px'}}>
+                <form id="register_form">
                 <TextField
-                    id="user_name"
+                    id="register_username"
                     label="Username"
                     type="text"
                     leftIcon={<FontIcon>account_box</FontIcon>}
                     required
-                    onChange={(value, e) => this.handleChange(value, e, 'username')}
+                    value={this.state.username}
+                    onChange={(value, e) => this.handleChange(e, 'username', value)}
                   />
              <TextField
-                    id="firstname"
+                    id="first_name"
                     label="First Name"
                     type="text"
                     leftIcon={<FontIcon>account_box</FontIcon>}
                     required
-                    onChange={(value, e) => this.handleChange(value, e, 'first_name')}
+                    value={this.state.first_name}
+                    onChange={(value, e) => this.handleChange(e, 'first_name', value)}
                   />
                   <TextField
-                    id="lastname"
+                    id="last_name"
                     label="Last Name"
                     type="text"
                     leftIcon={<FontIcon>lock</FontIcon>}
                     required
-                    onChange={(value, e) => this.handleChange(value, e, 'last_name')}
+                    value={this.state.last_name}
+                    onChange={(value, e) => this.handleChange(e, 'last_name', value)}
                   />
            <br/>
            <TextField
@@ -199,25 +225,23 @@ class Login extends Component {
                     type="email"
                     leftIcon={<FontIcon>account_box</FontIcon>}
                     required
-                    onChange={(value, e) => this.handleChange(value, e, 'email')}
+                    value={this.state.email}
+                    onChange={(value, e) => this.handleChange(e, 'email', value)}
                   />
                   <TextField
-                    id="password_2 s"
+                    id="register_password"
                     label="Password"
                     type="password"
                     leftIcon={<FontIcon>lock</FontIcon>}
                     required
-                    onChange={(value, e) => this.handleChange(value, e, 'password')}
+                    value={this.state.password}
+                    onChange={(value, e) => this.handleChange(e, 'password', value)}
                   />
+                </form>
               </section>
             </DialogContainer>
             </Cell>
-            <Snackbar
-              id="example-snackbar"
-              toasts={toasts}
-              autohide={autohide}
-              onDismiss={this.dismissToast}
-            />`
+            
           </Grid>
           
         )

@@ -28,6 +28,7 @@ def index(request):
 def loginuser(request):
     if request.method == 'POST':
         payload = json.loads(request.body)
+        print(payload)
         username = payload['username']
         password = payload['password']
         # login user
@@ -35,16 +36,17 @@ def loginuser(request):
             firstname = payload['first_name']
             lastname = payload['last_name']
             email = payload['email']
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'success': False, 'error_message': 'Username already exists!'})
+
             User.objects.create_user(username=username, first_name=firstname, last_name=lastname, email=email, password=password)
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            print("Logging in")
             return JsonResponse({'success': True})
         else:
-            print(" Invalid Login")
-            return JsonResponse({'success': False, 'error_message': 'Failed to login!'})
+            return JsonResponse({'success': False, 'error_message': 'Invalid login credentials!'})
     else:
         return render(request, 'login.html')
 
@@ -61,28 +63,7 @@ class UserView(APIView):
 
         user_serializer = UserSerializer(user)
         return Response(user_serializer.data)
-def registeruser(request):
-    if request.method == 'POST':
-        # register user
-        payload = json.loads(request.body)
-        username = payload['username']
-        firstname = payload['first_name']
-        lastname = payload['last_name']
-        email = payload['email']
-        passwd = payload['password']
 
-        User.objects.create_user(username=username, firstname=firstname, lastname=lastname, email=email, password=passwd)
-        user = authenticate(request, username=username, password=passwd)
-        if user is not None:
-            login(request, user)
-            print("Registered user")
-            return JsonResponse({'success': True})
-        else:
-            print(" Invalid Registeration")
-            return JsonResponse({'success': False, 'error_message': 'Failed to register!'})
-    else:
-        return render(request, 'login.html')
-        
 class ChannelView(APIView):
     renderer_classes = (JSONRenderer, )
 
@@ -147,7 +128,6 @@ class MessageView(APIView):
         Return a list of all messages.
         """
         channel, created = Channel.objects.get_or_create(channel_url=channel_url)
-        print("Created: {}".format(created))
         # We want to show the last 50 messages, ordered most-recent-last
         messages = Message.objects.filter(channel=channel).order_by('-timestamp')
         paginator = Paginator(messages, 10)

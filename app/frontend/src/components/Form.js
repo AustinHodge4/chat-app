@@ -84,9 +84,9 @@ class Form extends Component {
                 lineDirection={'right'}
                 rightIcon={<Buttons />}
                 onChange={(value, e) => this.handleChange(value, e)}
-                onKeyPress={ (event) => {
-                  if (event.key === 'Enter') {
-                    this.handleSubmit(event);
+                onKeyPress={ (e) => {
+                  if (e.key === 'Enter') {
+                    this.handleSubmit(e);
                   }
                 }}
                 value={this.state.message}

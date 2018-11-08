@@ -5,7 +5,7 @@ import Channel from "./Channel";
 import './global.js';
 import { NavigationDrawer, Autocomplete, DialogContainer, 
     TextField,  FontIcon, Button, Grid, Cell, MenuButton, ListItem,
-    Layover, List, ListItemControl, Avatar} from 'react-md';
+    Layover, List, Avatar} from 'react-md';
 
 function get_cookie(name) {
     var value;
@@ -470,6 +470,7 @@ class App extends Component{
                                                             dataLabel={'channel_name'}
                                                             dataValue={'channel_name'}
                                                             toolbar
+                                                            type='search'
                                                             value={autocompleteValue}
                                                             filter={Autocomplete.caseInsensitiveFilter}
                                                             style={{marginLeft: '32px', maxWidth: '300px'}}
@@ -583,5 +584,5 @@ class App extends Component{
           );
     }
 }
-const wrapper = document.getElementById("default");
+const wrapper = document.getElementById("app");
 wrapper ? ReactDOM.render(<App endpoint={window.location.href+'rooms'} />, wrapper) : null;
