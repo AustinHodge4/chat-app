@@ -7,6 +7,8 @@ import { Picker } from 'emoji-mart';
 
 import './global.js';
 
+
+
 class Form extends Component {
   static propTypes = {
     mediaClass: PropTypes.string,
@@ -23,6 +25,14 @@ class Form extends Component {
       mediaClass: props.mediaClass,
       showEmoji: false,
     };
+    navigator.serviceWorker.addEventListener('message', event => {
+      console.log(event.data);
+      if(event.data.user == this.props.user.username && event.data.msg){
+        console.log(event.data.msg);
+        this.setState({message: event.data.msg}, () => {this.handleSubmit(event)});
+      }
+      return;
+    });
   }
   
   onEmojiHide = () => {
@@ -48,7 +58,8 @@ class Form extends Component {
     }
   };
   render() {
-    const { name, message, channel, mediaClass, showEmoji} = this.state;
+    
+    const {channel, showEmoji} = this.state;
     const buttonStyle = {
       float: 'right'
     }

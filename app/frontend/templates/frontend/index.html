@@ -21,5 +21,15 @@
 {% load static %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script>
 <script src="{% static "frontend/index.js" %}"></script>
-
+<script>
+    if('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker
+            .register("{% url "service-worker.js" %}", {scope: '/'})
+            .then(function() { console.log("Service Worker Registered"); });
+        
+        Notification.requestPermission(function(status) {
+            console.log('Notification permission status:', status);
+        });
+    }
+</script>
 </html>
