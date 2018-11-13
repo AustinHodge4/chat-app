@@ -139,7 +139,7 @@ class Login extends Component {
             <Cell size={12} tabletSize={6} tabletOffset={1} desktopOffset={3} desktopSize={6}>
             <form id="login_form" onSubmit={(e) => this.handleSubmit(e, 'login')}>
               <Card className="md-block-centered">
-                <CardTitle title="Welcome to Chat-app" subtitle="Login or Register" />
+                <CardTitle title="Lets Talk About It" subtitle="Login or Register" />
                 <CardText>
                 <TextField
                     id="username"

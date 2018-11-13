@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import Channel from "./Channel";
 import './global.js';
+import '../css/spinner.css';
+
 import { NavigationDrawer, Autocomplete, DialogContainer, 
     TextField,  FontIcon, Button, Grid, Cell, MenuButton, ListItem,
     Layover, List, Avatar} from 'react-md';
@@ -19,6 +21,7 @@ function get_cookie(name) {
     }
     return value;
 }
+
 class App extends Component{
     constructor(props){
         super(props);
@@ -452,7 +455,11 @@ class App extends Component{
             </MenuButton>
         );
         return (
-            isLoading ? "Loading" : (
+            isLoading ? <div className={"loader"}>
+            <svg viewBox="0 0 32 32" width="32" height="32">
+              <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+            </svg>
+          </div> : (
             <NavigationDrawer
               drawerId="main-navigation"
               drawerTitle="Lets Talk About It"

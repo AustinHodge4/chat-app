@@ -49,6 +49,70 @@ class Channel extends Component {
     };
     })
   }
+  getCurrentNotification(registration) {
+        return registration.getNotifications()
+        .then(notifications => {
+          let currentNotification = null;
+    
+          for(let i = 0; i < notifications.length; i++) {
+            if (notifications[i].data && 
+                notifications[i].tag === this.props.channel.channel_name &&
+              notifications[i].data.user !== this.props.user.username) {
+              currentNotification = notifications[i];
+              console.log(currentNotification);
+              return currentNotification;
+            }
+          }
+    
+          return currentNotification;
+        })
+}
+
+notify(message){
+    if (Notification.permission == 'granted') {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+          if(!document.hasFocus()){
+            console.log("Notify");
+            this.getCurrentNotification(reg).then((currentNotification) => {
+              var options = {
+                tag: this.props.channel.channel_name + '$' + message.user.username,
+                body: message.message.message,
+                icon: 'https://avatars.io/instagram/'+message.user.username,
+                timestamp: Date.now(),
+                renotify: true,
+                actions: [
+                    {action: 'message', title: 'Reply', type:'text',
+                      },
+
+                  ],
+                data: {
+                    options: {
+                        action: 'message',
+                        close: 'true',
+                        url: document.location.toString(),
+                        user: this.props.user.username
+                    },
+                }
+              };
+        
+              if (currentNotification) {
+                // We have an open notification, let's do something with it.
+        
+                options.body = 'You have 2';
+                console.log(currentNotification);
+                // Remember to close the old notification.
+                //currentNotification.close();
+              } else {
+
+              }
+              let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
+              return reg.showNotification(title, options);
+            });
+          }
+        });
+        
+    }
+}
   componentDidMount() {
     chat_socket.onopen = function(){
       console.log("Connected to chat socket: ");
@@ -63,6 +127,11 @@ class Channel extends Component {
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
         }))
+        if(this.props.user.username !== message.user.username){
+          if(message.channel_name != this.props.channel.channel_name)
+            return;
+          this.notify(message);
+        }
       }
       else if(message.event == 'join_channel'){
         if(message.channel_name != this.props.channel.channel_name)

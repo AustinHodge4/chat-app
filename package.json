@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "webpack --config dev.config.js --progress --colors --mode development",
     "watch": "webpack --config dev.config.js --watch --mode development",
-    "build": "webpack --mode production ./app/frontend/src/index.js --output ./app/frontend/static/frontend/main.js",
+    "build": "webpack --mode production ./app/frontend/src/index.js --output ./app/frontend/static/frontend/index.js",
     "postinstall": "npm run build"
   },
   "keywords": [],
