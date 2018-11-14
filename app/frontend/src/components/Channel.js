@@ -75,7 +75,7 @@ notify(message){
             console.log("Notify");
             this.getCurrentNotification(reg).then((currentNotification) => {
               var options = {
-                tag: this.props.channel.channel_name + '$' + message.user.username,
+                tag: this.props.channel.channel_name,
                 body: message.message.message,
                 icon: 'https://avatars.io/instagram/'+message.user.username,
                 timestamp: Date.now(),
