@@ -43,7 +43,7 @@ class Form extends Component {
   }
   onEmojiAdd = (data) => {
     console.log(data);
-    this.setState(prevState => ({message: prevState.message +data.colons, showEmoji: false}));
+    this.setState(prevState => ({message: prevState.message +data.native, showEmoji: false}));
   }
   handleChange(value, e){
     this.setState({ message: value});

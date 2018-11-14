@@ -75,9 +75,10 @@ notify(message){
             console.log("Notify");
             this.getCurrentNotification(reg).then((currentNotification) => {
               var options = {
-                tag: this.props.channel.channel_name + '$' + message.user.username,
+                tag: this.props.channel.channel_name,
                 body: message.message.message,
                 icon: 'https://avatars.io/instagram/'+message.user.username,
+                badge: '/static/images/ic_stat_chat.png',
                 timestamp: Date.now(),
                 renotify: true,
                 actions: [
@@ -95,16 +96,6 @@ notify(message){
                 }
               };
         
-              if (currentNotification) {
-                // We have an open notification, let's do something with it.
-        
-                options.body = 'You have 2';
-                console.log(currentNotification);
-                // Remember to close the old notification.
-                //currentNotification.close();
-              } else {
-
-              }
               let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
               return reg.showNotification(title, options);
             });
