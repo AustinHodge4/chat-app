@@ -95,16 +95,6 @@ notify(message){
                 }
               };
         
-              if (currentNotification) {
-                // We have an open notification, let's do something with it.
-        
-                options.body = 'You have 2';
-                console.log(currentNotification);
-                // Remember to close the old notification.
-                //currentNotification.close();
-              } else {
-
-              }
               let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
               return reg.showNotification(title, options);
             });
