@@ -36,9 +36,8 @@ self.addEventListener('fetch', function(event) {
 self.addEventListener('notificationclick', function(event) {
   var notification = event.notification;
   console.log(notification);
-  if(event.action == 'close'){
-    notification.close();
-  }
+  notification.close();
+
   if (!notification.data.hasOwnProperty('options'))
       return;
 
@@ -55,7 +54,6 @@ self.addEventListener('notificationclick', function(event) {
           } else {
             client.focus();
           }
-          //notification.close();
             return;
         });
   }
@@ -67,5 +65,4 @@ self.addEventListener('notificationclick', function(event) {
   }
 
   event.waitUntil(promise);
-  notification.close();
 });

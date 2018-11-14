@@ -78,6 +78,7 @@ notify(message){
                 tag: this.props.channel.channel_name,
                 body: message.message.message,
                 icon: 'https://avatars.io/instagram/'+message.user.username,
+                badge: '/static/images/ic_stat_chat.png',
                 timestamp: Date.now(),
                 renotify: true,
                 actions: [
