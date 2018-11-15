@@ -16,7 +16,8 @@ class Form extends Component {
     mediaClass: PropTypes.string,
     disable: PropTypes.bool.isRequired, 
     channel: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.object.isRequired,
+    scrollCallback: PropTypes.func.isRequired,
   };
   constructor(props){
     super(props);
@@ -49,6 +50,7 @@ class Form extends Component {
   }
   handleChange(value, e){
     this.setState({ message: value});
+    this.props.scrollCallback();
   };
   handleSubmit = e => {
     e.preventDefault();
@@ -106,6 +108,7 @@ class Form extends Component {
                 disabled={this.state.disable}
                 style={textStyle}
                 inputStyle={areaStyle}
+                onFocus={this.props.scrollCallback}
               />  
               <DialogContainer
                 id="simple-list-dialog"

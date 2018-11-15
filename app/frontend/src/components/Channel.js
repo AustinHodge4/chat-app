@@ -201,20 +201,19 @@ notify(message){
       .then(data => {
         this.setState({ data: data, loaded: true }); 
         //console.log(data);
-        this.scrollDown(this.refs['scroll-box']);
+        this.scrollToElement();
       });
-      
   }
-  scrollDown(element){
-    if(element){
-      element.scrollTop = element.scrollHeight;
+  scrollToElement(){
+    if(this.scroll){
+      this.scroll.scrollTo(0, this.scroll.scrollHeight);
     }
   }
   handleScroll(e){
     if(e.target.scrollTop <= 0){
       this.setState({prevScrollHeight: e.target.scrollHeight}, () => {
         this.loadMoreMessages().then(data => {
-          this.refs['scroll-box'].scrollTop =  this.refs['scroll-box'].scrollHeight - this.state.prevScrollHeight;
+          this.scroll.scrollTop =  this.scroll.scrollHeight - this.state.prevScrollHeight;
         });      
       });
       
@@ -245,13 +244,13 @@ notify(message){
     }
     return (loaded) ? (   
       <div> 
-        <div ref="scroll-box" style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
+        <div ref={(el) =>{this.scroll= el;}} style={messagesContainer} onScroll={(e) => {this.handleScroll(e)}}>    
           <Grid style={scrollBox}>
             <Cell size={12} style={flexBox}><Messages messages={data} mobile={this.props.mediaClass == ''} /></Cell>
           </Grid>
         </div>
         <ReactResizeDetector handleHeight resizableElementId={'2'} onResize={(width, height) => this.onResize(width, height)}/>
-        <Toolbar id={'2'} fixed={true} style={messageBox} themed={true} title={<Form className={'md-title md-title--toolbar '+this.props.mediaClass} mediaClass={this.props.mediaClass} disable={!channelAccess} channel={channel} user={this.props.user} />} />
+        <Toolbar id={'2'} fixed={true} style={messageBox} themed={true} title={<Form className={'md-title md-title--toolbar '+this.props.mediaClass} mediaClass={this.props.mediaClass} disable={!channelAccess} channel={channel} user={this.props.user} scrollCallback={() => this.scrollToElement()} />} />
       </div>
       ) : ( <p>{placeholder}</p>);
   }

@@ -8,6 +8,7 @@ import json
 class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
+        self.accept()
         channel_url = self.scope['url_route']['kwargs']['channel_url']
         self.room_name = Channel.objects.get(channel_url=channel_url).channel_name
         print('chat_%s' % self.room_name)
@@ -38,7 +39,7 @@ class ChatConsumer(WebsocketConsumer):
                         }
                     )
 
-        self.accept()
+        
 
     def disconnect(self, close_code):
         # Leave room group
