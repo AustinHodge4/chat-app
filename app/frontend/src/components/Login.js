@@ -12,7 +12,7 @@ import Button from 'react-md/lib/Buttons/Button';
 import TextField from 'react-md/lib/TextFields/TextField';
 import FontIcon from 'react-md/lib/FontIcons/FontIcon';
 import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
-import Snackbar from 'react-md/lib/Snackbars/Snackbar';
+import {Snackbar} from 'react-md';
 
 
 function get_cookie(name) {
