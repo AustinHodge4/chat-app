@@ -213,7 +213,7 @@ notify(message){
     if(e.target.scrollTop <= 0){
       this.setState({prevScrollHeight: e.target.scrollHeight}, () => {
         this.loadMoreMessages().then(data => {
-          this.scroll.scrollTop =  this.scroll.scrollHeight - this.state.prevScrollHeight;
+          this.scroll.scrollTo(0, this.scroll.scrollHeight - this.state.prevScrollHeight);
         });      
       });
       

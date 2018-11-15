@@ -109,6 +109,7 @@ class Form extends Component {
                 style={textStyle}
                 inputStyle={areaStyle}
                 onFocus={this.props.scrollCallback}
+                onClick={this.props.scrollCallback}
               />  
               <DialogContainer
                 id="simple-list-dialog"
