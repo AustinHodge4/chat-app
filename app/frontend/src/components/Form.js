@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import {Grid, Cell, Button, TextField, DialogContainer} from 'react-md';
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
+import Button from 'react-md/lib/Buttons/Button';
+import TextField from 'react-md/lib/TextFields/TextField';
+import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
+
 import 'emoji-mart/css/emoji-mart.css';
 import { Picker } from 'emoji-mart';
 
-
 import './global.js';
-
-
 
 class Form extends Component {
   static propTypes = {

@@ -1,8 +1,19 @@
  import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import { Card, CardTitle, CardText, CardActions, 
-  Toolbar, Button, TextField, FontIcon, Grid, 
-  DialogContainer, Cell, Snackbar} from 'react-md';
+
+import Card from 'react-md/lib/Cards/Card';
+import CardTitle from 'react-md/lib/Cards/CardTitle';
+import CardText from 'react-md/lib/Cards/CardText';
+import CardActions from 'react-md/lib/Cards/CardActions';
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
+import Toolbar from 'react-md/lib/Toolbars/Toolbar';
+import Button from 'react-md/lib/Buttons/Button';
+import TextField from 'react-md/lib/TextFields/TextField';
+import FontIcon from 'react-md/lib/FontIcons/FontIcon';
+import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
+import Snackbar from 'react-md/lib/Snackbars/Snackbar';
+
 
 function get_cookie(name) {
   var value;

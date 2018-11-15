@@ -1,7 +1,10 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
+
 import Message from './Message';
-import {Grid, Cell} from 'react-md';
+
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
 
 class Messages extends Component{
   static propTypes = {

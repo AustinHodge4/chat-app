@@ -1,10 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import './global.js';
+
 import Form from './Form';
 import Messages from "./Messages";
-import {Grid, Cell, Toolbar} from "react-md";
+
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
+import Toolbar from 'react-md/lib/Toolbars/Toolbar';
 import ReactResizeDetector from 'react-resize-detector';
+
+import './global.js';
 
 class Channel extends Component {
 

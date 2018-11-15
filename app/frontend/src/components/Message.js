@@ -1,7 +1,9 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
-import {Cell, Avatar, Grid} from 'react-md';
-import {Twemoji} from 'react-emoji-render';
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
+import Avatar from 'react-md/lib/Avatars/Avatar';
+import Twemoji from 'react-emoji-render';
 const moment = require('moment');
 
 class Message extends Component{

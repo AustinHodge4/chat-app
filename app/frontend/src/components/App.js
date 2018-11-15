@@ -1,13 +1,25 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
+
 import Channel from "./Channel";
+
+import NavigationDrawer from 'react-md/lib/NavigationDrawers/NavigationDrawer';
+import Autocomplete from 'react-md/lib/Autocompletes/Autocomplete';
+import FontIcon from 'react-md/lib/FontIcons/FontIcon';
+import Grid from 'react-md/lib/Grids/Grid';
+import Cell from 'react-md/lib/Grids/Cell';
+import Button from 'react-md/lib/Buttons/Button';
+import TextField from 'react-md/lib/TextFields/TextField';
+import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
+import MenuButton from 'react-md/lib/Menus/MenuButton';
+import List from 'react-md/lib/Lists/List';
+import ListItem from 'react-md/lib/Lists/ListItem';
+import Avatar from 'react-md/lib/Avatars/Avatar';
+import Layover from 'react-md/lib/Helpers/Layover';
+
 import './global.js';
 import '../css/spinner.css';
-
-import { NavigationDrawer, Autocomplete, DialogContainer, 
-    TextField,  FontIcon, Button, Grid, Cell, MenuButton, ListItem,
-    Layover, List, Avatar} from 'react-md';
 
 function get_cookie(name) {
     var value;
