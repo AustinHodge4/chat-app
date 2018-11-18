@@ -20,7 +20,7 @@ class Message extends Component{
         }
         const cellStyle = {
             marginTop: '0',
-            marginLeft: '16px'
+            marginLeft: '0'
         }
         const nameStyle = {
             display: 'inline',

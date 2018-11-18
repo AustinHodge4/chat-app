@@ -227,6 +227,9 @@ notify(message){
       height: scrollBoxHeight,
     }
     const scrollBox = {
+      paddingLeft: '0px',
+      paddingRight: '0px',
+      paddingTop: '0px',
       paddingBottom: messageBoxHeight,
       minHeight: scrollBoxHeight
     }

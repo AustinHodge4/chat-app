@@ -128,9 +128,9 @@ class MessageView(APIView):
         Return a list of all messages.
         """
         channel, created = Channel.objects.get_or_create(channel_url=channel_url)
-        # We want to show the last 50 messages, ordered most-recent-last
+        # We want to show the last 25 messages, ordered most-recent-last
         messages = Message.objects.filter(channel=channel).order_by('-timestamp')
-        paginator = Paginator(messages, 10)
+        paginator = Paginator(messages, 25)
         page = int(request.GET.get('page', 1))
 
         if page >= paginator.num_pages+1:
