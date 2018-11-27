@@ -6,10 +6,10 @@ import Button from 'react-md/lib/Buttons/Button';
 import TextField from 'react-md/lib/TextFields/TextField';
 import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
 
-import 'emoji-mart/css/emoji-mart.css';
+import '../css/emoji-mart.css';
 import { Picker } from 'emoji-mart';
 
-import './global.js';
+import './socket.js';
 
 class Form extends Component {
   static propTypes = {
@@ -29,9 +29,9 @@ class Form extends Component {
       showEmoji: false,
     };
     navigator.serviceWorker.addEventListener('message', event => {
-      console.log(event.data);
+      //console.log(event.data);
       if(event.data.user == this.props.user.username && event.data.msg){
-        console.log(event.data.msg);
+        //console.log(event.data.msg);
         this.setState({message: event.data.msg}, () => {this.handleSubmit(event)});
       }
       return;

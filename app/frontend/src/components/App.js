@@ -18,7 +18,7 @@ import ListItem from 'react-md/lib/Lists/ListItem';
 import Avatar from 'react-md/lib/Avatars/Avatar';
 import Layover from 'react-md/lib/Helpers/Layover';
 
-import './global.js';
+import './socket.js';
 import '../css/spinner.css';
 
 function get_cookie(name) {
@@ -340,7 +340,7 @@ class App extends Component{
     onAutoComplete(suggestion, suggestionIndex, matches){
         this.setState({autocompleteValue: ''})
         var channel_url = matches[suggestionIndex].channel_url;
-        console.log("Channing socket to: "+ channel_url);
+        //console.log("Channing socket to: "+ channel_url);
         change_socket(channel_url+'/');
         if(this.isChannelSubscribed(suggestion))
             this.onSelectedChannel(null, suggestion, channel_url)
@@ -393,17 +393,17 @@ class App extends Component{
     }
     componentDidMount() {
         chat_socket.onopen = function(){
-            console.log("Connected to chat socket: Generic");
+            //console.log("Connected to chat socket: Generic");
         }
         chat_socket.onclose = function(){
-            console.log("Disconnected from chat socket: Generic");
+            //console.log("Disconnected from chat socket: Generic");
         }
         chat_socket.onmessage = function(m){
             var data = JSON.parse(m.data);
-            console.log("App.js:")
-            console.log(data.event);
+            //console.log("App.js:")
+            //console.log(data.event);
             if(data.event == 'add_channel' || data.event == 'delete_channel'){
-                console.log("Fetching from websocket")
+                //console.log("Fetching from websocket")
                 this.fetchChannels();
             }
         }.bind(this)
@@ -474,10 +474,11 @@ class App extends Component{
           </div> : (
             <NavigationDrawer
               drawerId="main-navigation"
+              drawerClassName="app-font"
               drawerTitle="Let's Talk About It"
               toolbarId="main-toolbar"
               tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY}
-              toolbarTitle={channelSelected && activeChannel != null ? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " Topic: " + activeChannel.topic : "") : "Select a Channel or"}
+              toolbarTitle={channelSelected && activeChannel != null ? '# '+activeChannel.channel_name +(activeChannel.topic != null && activeChannel.topic != '' ? " - Topic: " + activeChannel.topic : "") : "Select a Channel or"}
               toolbarTitleStyle={channelStyle}
               navItems={navItems}
               onMediaTypeChange={(type, media) => this.onMediaChange(type, media)}

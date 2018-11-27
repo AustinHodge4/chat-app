@@ -9,7 +9,7 @@ import Cell from 'react-md/lib/Grids/Cell';
 import Toolbar from 'react-md/lib/Toolbars/Toolbar';
 import ReactResizeDetector from 'react-resize-detector';
 
-import './global.js';
+import './socket.js';
 
 class Channel extends Component {
 
@@ -25,6 +25,7 @@ class Channel extends Component {
       scrollBoxHeight: 'calc(100vh - 144px)',
       messageBoxHeight: '72px',
       prevScrollHeight: null,
+      loadedAllMessages: false,
     }
     this.scroll = React.createRef();
   }
@@ -38,87 +39,17 @@ class Channel extends Component {
     leaveCallback: PropTypes.func.isRequired
   };
 
-  onResize(width, height){
-    this.setState({scrollBoxHeight: "calc(100vh - "+(height)+"px)", messageBoxHeight: height+'px'});
-  }
-  loadMoreMessages = () => {
-    return fetch(this.props.endpoint+""+this.state.page).then(response => {
-      return response.json();
-    }).then(messages =>{
-      //console.log(messages);
-      if(Object.keys(messages).length != 0){
-      this.setState(prevState => ({
-        data: prevState.data.concat(messages),
-        page: prevState.page + 1
-      }))
-    };
-    })
-  }
-  getCurrentNotification(registration) {
-        return registration.getNotifications()
-        .then(notifications => {
-          let currentNotification = null;
-    
-          for(let i = 0; i < notifications.length; i++) {
-            if (notifications[i].data && 
-                notifications[i].tag === this.props.channel.channel_name &&
-              notifications[i].data.user !== this.props.user.username) {
-              currentNotification = notifications[i];
-              console.log(currentNotification);
-              return currentNotification;
-            }
-          }
-    
-          return currentNotification;
-        })
-}
-
-notify(message){
-    if (Notification.permission == 'granted') {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-          if(!document.hasFocus()){
-            console.log("Notify");
-            this.getCurrentNotification(reg).then((currentNotification) => {
-              var options = {
-                tag: this.props.channel.channel_name,
-                body: message.message.message,
-                icon: 'https://avatars.io/instagram/'+message.user.username,
-                badge: '/static/images/ic_stat_chat.png',
-                timestamp: Date.now(),
-                renotify: true,
-                actions: [
-                    {action: 'message', title: 'Reply', type:'text',
-                      },
-
-                  ],
-                data: {
-                    options: {
-                        action: 'message',
-                        close: 'true',
-                        url: document.location.toString(),
-                        user: this.props.user.username
-                    },
-                }
-              };
-        
-              let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
-              return reg.showNotification(title, options);
-            });
-          }
-        });
-        
-    }
-}
+  
   componentDidMount() {
     chat_socket.onopen = function(){
-      console.log("Connected to chat socket: ");
+      //console.log("Connected to chat socket: ");
     }
     chat_socket.onclose = function(){
-      console.log("Disconnected from chat socket: ");
+      //console.log("Disconnected from chat socket: ");
     }
     chat_socket.onmessage = function(m){
       var message = JSON.parse(m.data);
-      console.log(message);
+      //console.log(message);
       if(message.event == 'message_channel'){
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
@@ -135,9 +66,9 @@ notify(message){
 
         if(this.props.user.username == message.user.username){
           this.props.joinCallback(message.channel_name);
-          console.log("You Join");
+          //console.log("You Join");
         } else {
-          console.log("Someone Join")
+          //console.log("Someone Join")
           this.props.leaveCallback(false);
         }
       }
@@ -147,9 +78,9 @@ notify(message){
 
         if(this.props.user.username == message.user.username){
           this.props.leaveCallback(false);
-          console.log("You Change Topic");
+          //console.log("You Change Topic");
         } else {
-          console.log("Someone Change Topic")
+          //console.log("Someone Change Topic")
           this.props.leaveCallback(false);
         }
       }
@@ -159,9 +90,9 @@ notify(message){
           
         if(this.props.user.username == message.user.username){
           this.props.leaveCallback(true);
-          console.log("You Leave")
+          //console.log("You Leave")
         } else {
-          console.log("Someone Left")
+          //console.log("Someone Left")
           this.props.leaveCallback(false);
         }
       }
@@ -169,11 +100,11 @@ notify(message){
        
         if(this.props.channel){
           if(this.props.channel.channel_name == message.channel_name && this.props.user.username == message.user.username){
-            console.log("You Deleted Channel")
+            //console.log("You Deleted Channel")
             this.props.leaveCallback(true);
           }
           else{
-            console.log("Somone Delete Channel")
+            //console.log("Somone Delete Channel")
             this.props.leaveCallback(false);
           }
         }
@@ -181,11 +112,11 @@ notify(message){
       else if(message.event == 'add_channel'){
        
         if(this.props.user.username != message.user.username){
-          console.log("Someone Add Channel")
+          //console.log("Someone Add Channel")
           this.props.leaveCallback(false);
         }
         else{
-          console.log("You Add Channel")
+          //console.log("You Add Channel")
         }
 
       }
@@ -204,13 +135,27 @@ notify(message){
         this.scrollToElement();
       });
   }
+  loadMoreMessages = () => {
+    return fetch(this.props.endpoint+""+this.state.page).then(response => {
+      return response.json();
+    }).then(messages =>{
+      if(Object.keys(messages).length != 0){
+        this.setState(prevState => ({
+          data: prevState.data.concat(messages),
+          page: prevState.page + 1
+        }));
+      } else {
+        this.setState({loadedAllMessages: true});
+      }
+    })
+  }
   scrollToElement(){
     if(this.scroll){
       this.scroll.scrollTo(0, this.scroll.scrollHeight);
     }
   }
   handleScroll(e){
-    if(e.target.scrollTop <= 0){
+    if(e.target.scrollTop <= 0 && this.state.loadedAllMessages == false){
       this.setState({prevScrollHeight: e.target.scrollHeight}, () => {
         this.loadMoreMessages().then(data => {
           this.scroll.scrollTo(0, this.scroll.scrollHeight - this.state.prevScrollHeight);
@@ -218,6 +163,63 @@ notify(message){
       });
       
     }
+  }
+  onResize(width, height){
+    this.setState({scrollBoxHeight: "calc(100vh - "+(height)+"px)", messageBoxHeight: height+'px'});
+  }
+  getCurrentNotification(registration) {
+        return registration.getNotifications()
+        .then(notifications => {
+          let currentNotification = null;
+    
+          for(let i = 0; i < notifications.length; i++) {
+            if (notifications[i].data && 
+                notifications[i].tag === this.props.channel.channel_name &&
+              notifications[i].data.user !== this.props.user.username) {
+              currentNotification = notifications[i];
+              //console.log(currentNotification);
+              return currentNotification;
+            }
+          }
+    
+          return currentNotification;
+        })
+  }
+  notify(message){
+      if (Notification.permission == 'granted') {
+        navigator.serviceWorker.getRegistration().then((reg) => {
+            if(!document.hasFocus()){
+              //console.log("Notify");
+              this.getCurrentNotification(reg).then((currentNotification) => {
+                var options = {
+                  tag: this.props.channel.channel_name,
+                  body: message.message.message,
+                  icon: 'https://avatars.io/instagram/'+message.user.username,
+                  badge: '/static/images/ic_stat_chat.png',
+                  timestamp: Date.now(),
+                  renotify: true,
+                  actions: [
+                      {action: 'message', title: 'Reply', type:'text',
+                        },
+
+                    ],
+                  data: {
+                      options: {
+                          action: 'message',
+                          close: 'true',
+                          url: document.location.toString(),
+                          user: this.props.user.username
+                      },
+                  }
+                };
+          
+                let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
+                return reg.showNotification(title, options);
+              });
+            }
+          });
+          
+      }
   }
   render() {
     const { data, loaded, placeholder, channel, channelAccess, scrollBoxHeight, messageBoxHeight } = this.state;

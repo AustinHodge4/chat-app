@@ -1,4 +1,4 @@
- import React, { Component } from "react";
+import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Card from 'react-md/lib/Cards/Card';
@@ -87,7 +87,7 @@ class Login extends Component {
             body: JSON.stringify(payload)
           }).then(response => {
               if (response.status !== 200) {
-                  this.addToast('Unexpected fail to login');
+                  this.addToast('Unexpected fail to login. Refresh and try again.');
                   return null;
               }
               return response.json();
@@ -150,7 +150,7 @@ class Login extends Component {
             <Cell size={12} tabletSize={6} tabletOffset={1} desktopOffset={3} desktopSize={6}>
             <form id="login_form" onSubmit={(e) => this.handleSubmit(e, 'login')}>
               <Card className="md-block-centered">
-                <CardTitle title="Let's Talk About It" subtitle="Login or Register" />
+                <CardTitle className="app-font" title="Let's Talk About It" subtitle="Login or Register" />
                 <CardText>
                 <TextField
                     id="username"

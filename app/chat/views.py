@@ -107,7 +107,7 @@ class ChannelView(APIView):
             return Response({'success': True, 'channel_name': data['channel_name'], 'channel_url': new_channel.channel_url})
         elif data['type'] == 'change_topic':
             if len(data['channel_topic']) > 40:
-                return Response({'success': False, 'type':'topic_error', 'reason': 'Topic must be less than 41 characters!'})
+                return Response({'success': False, 'type':'topic_error', 'reason': 'Topic must be at most 40 characters!'})
 
             channel = Channel.objects.get(channel_name=data['channel_name'])
             if channel.topic == data['channel_topic']:
