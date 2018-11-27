@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import PropTypes from "prop-types";
 
 import Channel from "./Channel";
 
@@ -86,9 +85,6 @@ class App extends Component{
 
     }
     
-    static propTypes = {
-        endpoint: PropTypes.string.isRequired,
-    };
     createNavItem(prevState, data){
         let items = [];
         let lastChannelIndex = this.state.lastChannelIndex;
@@ -605,4 +601,4 @@ class App extends Component{
     }
 }
 const wrapper = document.getElementById("app");
-wrapper ? ReactDOM.render(<App endpoint={window.location.href+'rooms'} />, wrapper) : null;
+wrapper ? ReactDOM.render(<App />, wrapper) : null;

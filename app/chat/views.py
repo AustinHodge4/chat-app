@@ -93,7 +93,7 @@ class ChannelView(APIView):
             if Channel.objects.filter(channel_name=data['channel_name']):
                 return Response({'success': False, 'type':'name_error', 'reason': 'Channel already exists!'})
             if len(data['channel_topic']) > 40:
-                return Response({'success': False, 'type':'topic_error', 'reason': 'Topic must be less than 41 characters!'})
+                return Response({'success': False, 'type':'topic_error', 'reason': 'Topic must be at most 40 characters!'})
             if not re.match(r'^[a-zA-Z\d\-_. ]+$', data['channel_name']):
                 return Response({'success': False, 'type':'name_error', 'reason': 'Must contain only these special characters: underscores, hyphens, and periods'})
 
