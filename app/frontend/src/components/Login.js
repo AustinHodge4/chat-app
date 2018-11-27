@@ -94,7 +94,7 @@ class Login extends Component {
           })
           .then(data => {
               if(data.success){
-                  window.location.href = '../api';
+                  window.location.replace('../api');
               } else {
                 this.addToast(data.error_message);     
               }

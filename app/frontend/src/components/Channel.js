@@ -118,7 +118,7 @@ class Channel extends Component {
                   }
                 };
           
-                let title = '#'+message.message.channel.channel_name+' ' +message.user.username;
+                let title = message.user.username + ' • #' + message.message.channel.channel_name;
                 return reg.showNotification(title, options);
               });
             }
@@ -126,7 +126,7 @@ class Channel extends Component {
           
       }
   }
-  
+
   componentDidMount() {
     chat_socket.onopen = function(){
       //console.log("Connected to chat socket: ");
