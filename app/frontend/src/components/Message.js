@@ -42,7 +42,7 @@ class Message extends Component{
         return(
             <Grid style={messageBox}>
                 <Cell style={cellStyle} size={12}>
-                    <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.props.data.user.username+'.svg'} />
+                    <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.props.data.user.id+'.svg'} />
                     <Item />
                 </Cell>
             </Grid>

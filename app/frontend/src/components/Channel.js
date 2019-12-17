@@ -105,7 +105,7 @@ class Channel extends Component {
                 var options = {
                   tag: this.props.channel.channel_name,
                   body: message.message.message,
-                  icon: 'https://avatars.dicebear.com/v2/avataaars/'+message.user.username+'.svg',
+                  icon: 'https://avatars.dicebear.com/v2/avataaars/'+message.user.id+'.svg',
                   // icon: 'https://avatars.io/instagram/'+message.user.username,
                   badge: '/static/images/ic_stat_chat.png',
                   timestamp: Date.now(),

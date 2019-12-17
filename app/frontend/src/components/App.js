@@ -165,7 +165,7 @@ class App extends Component{
                     key: 'user', 
                     primaryText: this.state.user.username,
                     secondaryText: this.state.user.first_name + ' ' + this.state.user.last_name,
-                    leftAvatar: <Avatar style={{border: 'none', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.state.user.username+'.svg'} />,
+                    leftAvatar: <Avatar style={{border: 'none', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.state.user.id+'.svg'} />,
                 })
             }
             
@@ -572,7 +572,7 @@ class App extends Component{
                         primaryText={user.username}
                         primaryTextStyle={nameStyle}
                         secondaryText={user.first_name + " " + user.last_name}
-                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+user.username+'.svg'} />}
+                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+user.id+'.svg'} />}
                     />)}
                 </List>
             </DialogContainer>
