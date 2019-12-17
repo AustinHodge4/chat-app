@@ -28,14 +28,22 @@ class Form extends Component {
       mediaClass: props.mediaClass,
       showEmoji: false,
     };
-    navigator.serviceWorker.addEventListener('message', event => {
-      //console.log(event.data);
-      if(event.data.user == this.props.user.username && event.data.msg){
-        //console.log(event.data.msg);
-        this.setState({message: event.data.msg}, () => {this.handleSubmit(event)});
-      }
-      return;
-    });
+    this.handleNotificationSend = this.handleNotificationSend.bind(this);
+  }
+  handleNotificationSend(event){
+    console.log(event.data);
+    if(event.data.user == this.props.user.id){
+      console.log(event.data.msg);
+      this.setState({message: event.data.msg}, () => {this.handleSubmit(event)});
+    }
+  };
+  componentDidMount(){
+    if (Notification.permission == 'granted') {
+      navigator.serviceWorker.addEventListener('message', this.handleNotificationSend);
+    }
+  }
+  componentWillUnmount(){
+    navigator.serviceWorker.removeEventListener('message', this.handleNotificationSend);
   }
   
   onEmojiHide = () => {

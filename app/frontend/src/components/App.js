@@ -42,21 +42,28 @@ class App extends Component{
             channelSelected: false,
             channelAccess: false,
             activeChannel: null,
+
             user: null,
+
             isLoading: true,
+
             showCreateChannelDialog: false,
             showDeleteChannelDialog: false,
             showChannelUsersDialog: false,
             showChannelTopicDialog: false,
+
             newChannelName: '',
             newChannelTopic: '',
+
             changeChannelTopic: '',
+
             createChannelNameError: '',
             createChannelTopicError: '',
             changeChannelTopicError: '',
             createChannelNameErrorState: false,
             createChannelTopicErrorState: false,
             changeChannelTopicErrorState: false,
+
             autocompleteValue: '',
             lastChannelIndex: 1,
             navItems: [
@@ -158,7 +165,7 @@ class App extends Component{
                     key: 'user', 
                     primaryText: this.state.user.username,
                     secondaryText: this.state.user.first_name + ' ' + this.state.user.last_name,
-                    leftAvatar: <Avatar style={{border: 'none', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.state.user.username} />,
+                    leftAvatar: <Avatar style={{border: 'none', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.state.user.username+'.svg'} />,
                 })
             }
             
@@ -369,12 +376,18 @@ class App extends Component{
         this.setState({activeChannel: this.getChannelObject(channel_name)});
         })
     }
-    onLeaveChannel(local){
+    onUpdateChannels(){
+        this.fetchChannels().then(data => {
+            this.setState(prevState => ({activeChannel: (prevState.activeChannel != null ? this.getChannelObject(prevState.activeChannel.channel_name) : null)}));
+        })
+    }
+    onLeaveChannel(leave_further){
         this.fetchChannels().then(data =>{
-            if(local){
+            if(leave_further){
+                change_socket("generic/");
                 this.setState({channelSelected: false, channelAccess: false, activeChannel: null, showDeleteChannelDialog: false});
             } else {
-                this.setState(prevState => ({activeChannel: (prevState.activeChannel != null ? this.getChannelObject(prevState.activeChannel.channel_name) : null)}));
+                this.setState({channelAccess: false});
             }
         });
     }
@@ -395,6 +408,7 @@ class App extends Component{
             //console.log("Disconnected from chat socket: Generic");
         }
         chat_socket.onmessage = function(m){
+            if(this.state.activeChannel != null) return;
             var data = JSON.parse(m.data);
             //console.log("App.js:")
             //console.log(data.event);
@@ -452,7 +466,7 @@ class App extends Component{
 
                     (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={3} onClick={(e) => this.onOpenChannelTopicDialog(e)} primaryText="Change Topic" /> : <div key={3}></div>,
 
-                    (activeChannel != null) && (activeChannel.creator != null) && (user.username == activeChannel.creator.username) ? 
+                    (activeChannel != null) && (activeChannel.creator != null) && (user.id == activeChannel.creator.id) ? 
                     <ListItem key={2} onClick={(e) => this.onOpenDeleteChannelDialog(e)} primaryText="Delete Channel" /> :
                     (activeChannel != null) && (activeChannel.creator != null) ? <ListItem key={2} onClick={(e) => this.onButtonClick(e, "Leave")} primaryText="Leave Channel" /> : <div key={2}></div>
 
@@ -462,12 +476,24 @@ class App extends Component{
                 more_vert
             </MenuButton>
         );
+        const Loader = () => (
+            <div className={"loader"}>
+                <svg viewBox="0 0 32 32" width="32" height="32">
+                    <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+                </svg>
+            </div>
+        );
+        const ToolBarActions = () => {
+            if(channelSelected){
+                if(channelAccess)
+                    return <ChatOptions />
+                else
+                    return <Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>
+            }
+            return null
+        };
         return (
-            isLoading ? <div className={"loader"}>
-            <svg viewBox="0 0 32 32" width="32" height="32">
-              <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
-            </svg>
-          </div> : (
+            isLoading ? <Loader /> : (
             <NavigationDrawer
               drawerId="main-navigation"
               drawerClassName="app-font"
@@ -494,9 +520,7 @@ class App extends Component{
                                                             onChange={(text, e) => this.onAutoCompleteChange(text, e)}
                                                             onAutocomplete={(suggestion, suggestionIndex, matches) => (this.onAutoComplete(suggestion, suggestionIndex, matches))}
                                                         />}
-              toolbarActions={channelSelected ? (
-                  channelAccess ? (<ChatOptions />) 
-                    : (<Button onClick={(e) => this.onButtonClick(e, "Join")} flat primary swapTheming>Join Channel</Button>)) : null}
+              toolbarActions={<ToolBarActions />}
             >
             <DialogContainer
                 id="create_channel_dialog"
@@ -548,7 +572,7 @@ class App extends Component{
                         primaryText={user.username}
                         primaryTextStyle={nameStyle}
                         secondaryText={user.first_name + " " + user.last_name}
-                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+user.username} />}
+                        leftAvatar={ <Avatar style={{border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+user.username+'.svg'} />}
                     />)}
                 </List>
             </DialogContainer>
@@ -580,6 +604,7 @@ class App extends Component{
                                {channelSelected && activeChannel != null ? (
                                channelAccess? (<Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
                                                         channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
+                                                        updateChannelsCallback={()=>this.onUpdateChannels()} 
                                                         endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />)
                                : (
                                 <div>
@@ -591,7 +616,7 @@ class App extends Component{
                                     <div style={divStyle}>
                                         <Channel key={activeChannel.channel_name} mediaClass={mediaClass} user={user} channelAccess={channelAccess} 
                                                 channel={activeChannel} joinCallback={(channel_name) => this.onJoinChannel(channel_name)} leaveCallback={(local) => this.onLeaveChannel(local)}
-                                                endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />
+                                                updateChannelsCallback={()=>this.onUpdateChannels()}  endpoint={window.location.href+activeChannel.channel_url+'/messages?page='} />
                                     </div>
                                 </div>
                                )) : null}

@@ -8,8 +8,13 @@ class Channel(models.Model):
     channel_name = models.TextField(unique=True, db_index=True)
     channel_url = models.SlugField(unique=True, db_index=True, null=True, blank=True)
     topic = models.TextField(max_length=40, blank=True, null=True)
+    private = models.BooleanField(default=False) 
     users = models.ManyToManyField(User, blank=True, related_name='subscribers')
     creator = models.ForeignKey(User, null=True, blank=True, related_name='creator', on_delete=models.CASCADE)
+
+    class Meta():
+        unique_together = ('channel_name', 'channel_url')
+
     def __str__(self):
         return "Channel ID: {} - Slug: {} - Topic: {} - Users: {} - Creator: {}".format(self.channel_name, self.channel_url, self.topic, self.users, self.creator)
     

@@ -13,6 +13,7 @@ import './socket.js';
 import '../css/spinner.css';
 
 class Channel extends Component {
+  _IsMounted = false;
 
   constructor(props){
     super(props);
@@ -37,20 +38,25 @@ class Channel extends Component {
     endpoint: PropTypes.string.isRequired,
     user: PropTypes.object.isRequired,
     joinCallback: PropTypes.func.isRequired,
-    leaveCallback: PropTypes.func.isRequired
+    leaveCallback: PropTypes.func.isRequired,
+    updateChannelsCallback: PropTypes.func.isRequired,
   };
 
   loadMoreMessages = () => {
-    return fetch(this.props.endpoint+""+this.state.page).then(response => {
+    var url = this.props.endpoint+""+this.state.page;
+    console.log(url);
+    return fetch(url).then(response => {
       return response.json();
     }).then(messages =>{
-      if(Object.keys(messages).length != 0){
-        this.setState(prevState => ({
-          data: prevState.data.concat(messages),
-          page: prevState.page + 1
-        }));
-      } else {
-        this.setState({loadedAllMessages: true});
+      if(this._IsMounted){
+        if(Object.keys(messages).length != 0){
+          this.setState(prevState => ({
+            data: prevState.data.concat(messages),
+            page: prevState.page + 1
+          }));
+        } else {
+          this.setState({loadedAllMessages: true});
+        }
       }
     })
   }
@@ -80,7 +86,7 @@ class Channel extends Component {
           for(let i = 0; i < notifications.length; i++) {
             if (notifications[i].data && 
                 notifications[i].tag === this.props.channel.channel_name &&
-              notifications[i].data.user !== this.props.user.username) {
+              notifications[i].data.user !== this.props.user.id) {
               currentNotification = notifications[i];
               //console.log(currentNotification);
               return currentNotification;
@@ -99,7 +105,8 @@ class Channel extends Component {
                 var options = {
                   tag: this.props.channel.channel_name,
                   body: message.message.message,
-                  icon: 'https://avatars.io/instagram/'+message.user.username,
+                  icon: 'https://avatars.dicebear.com/v2/avataaars/'+message.user.username+'.svg',
+                  // icon: 'https://avatars.io/instagram/'+message.user.username,
                   badge: '/static/images/ic_stat_chat.png',
                   timestamp: Date.now(),
                   renotify: true,
@@ -113,7 +120,7 @@ class Channel extends Component {
                           action: 'message',
                           close: 'true',
                           url: document.location.toString(),
-                          user: this.props.user.username
+                          user: this.props.user.id
                       },
                   }
                 };
@@ -126,8 +133,11 @@ class Channel extends Component {
           
       }
   }
-
+  componentWillReceiveProps(nextProps) {
+    this.setState({ channel: nextProps.channel, channelAccess: nextProps.channelAccess });  
+  }
   componentDidMount() {
+    this._IsMounted = true;
     chat_socket.onopen = function(){
       //console.log("Connected to chat socket: ");
     }
@@ -141,52 +151,56 @@ class Channel extends Component {
         this.setState(prevState => ({
           data: [message.message, ...prevState.data]
         }))
-        if(this.props.user.username !== message.user.username){
-          if(message.channel_name != this.props.channel.channel_name)
-            return;
+        if(this.props.user.id !== message.user.id){
+          // if(message.channel_name != this.props.channel.channel_name)
+          //   return;
           this.notify(message);
         }
       }
       else if(message.event == 'join_channel'){
-        if(message.channel_name != this.props.channel.channel_name)
-          return;
+        // if(message.channel_name != this.props.channel.channel_name)
+        //   return;
 
-        if(this.props.user.username == message.user.username){
+        if(this.props.user.id == message.user.id){
           this.props.joinCallback(message.channel_name);
           //console.log("You Join");
         } else {
           //console.log("Someone Join")
-          this.props.leaveCallback(false);
+          // this.props.leaveCallback(false);
+          this.props.updateChannelsCallback();
         }
       }
       else if(message.event == 'change_topic'){
-        if(message.channel_name != this.props.channel.channel_name)
-          return;
+        // if(message.channel_name != this.props.channel.channel_name)
+        //   return;
+        
+        this.props.updateChannelsCallback();
 
-        if(this.props.user.username == message.user.username){
-          this.props.leaveCallback(false);
-          //console.log("You Change Topic");
-        } else {
-          //console.log("Someone Change Topic")
-          this.props.leaveCallback(false);
-        }
+        // if(this.props.user.id == message.user.id){
+        //   this.props.leaveCallback(false);
+        //   //console.log("You Change Topic");
+        // } else {
+        //   //console.log("Someone Change Topic")
+        //   this.props.leaveCallback(false);
+        // }
       }
       else if(message.event == 'leave_channel' ){
-         if(message.channel_name != this.props.channel.channel_name)
-          return;
-          
-        if(this.props.user.username == message.user.username){
-          this.props.leaveCallback(true);
-          //console.log("You Leave")
-        } else {
-          //console.log("Someone Left")
-          this.props.leaveCallback(false);
-        }
+        //  if(message.channel_name != this.props.channel.channel_name)
+        //   return;
+        
+        this.props.updateChannelsCallback();
+        // if(this.props.user.id == message.user.id){
+        //   this.props.leaveCallback(true);
+        //   //console.log("You Leave")
+        // } else {
+        //   //console.log("Someone Left")
+        //   this.props.leaveCallback(false);
+        // }
       }
       else if(message.event == 'delete_channel'){
        
         if(this.props.channel){
-          if(this.props.channel.channel_name == message.channel_name && this.props.user.username == message.user.username){
+          if(this.props.channel.channel_name == message.channel_name && this.props.user.id == message.user.id){
             //console.log("You Deleted Channel")
             this.props.leaveCallback(true);
           }
@@ -198,9 +212,10 @@ class Channel extends Component {
       }
       else if(message.event == 'add_channel'){
        
-        if(this.props.user.username != message.user.username){
+        if(this.props.user.id != message.user.id){
           //console.log("Someone Add Channel")
-          this.props.leaveCallback(false);
+          // this.props.leaveCallback(false);
+          this.updateChannelsCallback();
         }
         else{
           //console.log("You Add Channel")
@@ -221,6 +236,10 @@ class Channel extends Component {
         //console.log(data);
         this.scrollToElement();
       });
+  }
+  componentWillUnmount(){
+    // console.log("Channel UnMounted");
+    this._IsMounted = false;
   }
   render() {
     const { data, loaded, placeholder, channel, channelAccess, scrollBoxHeight, messageBoxHeight } = this.state;

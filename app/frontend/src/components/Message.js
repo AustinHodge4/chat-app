@@ -26,7 +26,7 @@ class Message extends Component{
             display: 'inline',
             marginRight: '8px',
             letterSpacing: '0',
-            fontSize: '24px'
+            fontSize: '1.3em'
         }
         const messageBox = {
             marginLeft: 'initial',
@@ -35,14 +35,14 @@ class Message extends Component{
         }
         const Item = () => (
             <Grid style={gridStyle} noSpacing={true}>
-                <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div><div style={{display: 'inline'}} className="md-font-light">{moment(this.props.data.timestamp).fromNow()}</div></Cell>
-                <Cell size={12} align={'top'} style={{fontSize: 'large'}}><Twemoji text={this.props.data.message} /></Cell>
+                <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div><div style={{display: 'inline', fontSize: '1.1rem !important'}} className="md-font-light">{moment(this.props.data.timestamp).fromNow()}</div></Cell>
+                <Cell size={12} align={'top'} style={{fontSize: '1.5rem'}}><Twemoji text={this.props.data.message} /></Cell>
             </Grid>
         );
         return(
             <Grid style={messageBox}>
                 <Cell style={cellStyle} size={12}>
-                    <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.io/instagram/'+this.props.data.user.username} />
+                    <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.props.data.user.username+'.svg'} />
                     <Item />
                 </Cell>
             </Grid>
