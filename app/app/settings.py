@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*.herokuapp.com']
+ALLOWED_HOSTS = ['letstalkaboutit.herokuapp.com', '0.0.0.0', 'localhost']
 
 ASGI_APPLICATION = 'app.routing.application'
 CHANNEL_LAYERS = {
