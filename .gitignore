@@ -1,10 +1,8 @@
 **/__pycache__
 **.pyc
 *.pyc
-db.sqlite3
 __pycache__
-webpack_stats.json
-local_settings.py
 app/app/local_settings.py
 app/db.sqlite3
+app/.coverage
 webpack-stats.json
