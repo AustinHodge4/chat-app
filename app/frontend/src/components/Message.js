@@ -26,7 +26,7 @@ class Message extends Component{
             display: 'inline',
             marginRight: '8px',
             letterSpacing: '0',
-            fontSize: '1.3em'
+            fontSize: '1.3em',
         }
         const messageBox = {
             marginLeft: 'initial',
@@ -35,8 +35,11 @@ class Message extends Component{
         }
         const Item = () => (
             <Grid style={gridStyle} noSpacing={true}>
-                <Cell align={'top'} size={12}><div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div><div style={{display: 'inline', fontSize: '1.1rem !important'}} className="md-font-light">{moment(this.props.data.timestamp).fromNow()}</div></Cell>
-                <Cell size={12} align={'top'} style={{fontSize: '1.5rem'}}><Twemoji text={this.props.data.message} /></Cell>
+                <Cell align={'top'} size={12}>
+                    <div className="md-title md-font-bold" style={nameStyle}>{this.props.data.user.username}</div>
+                    <div style={{display: 'inline', fontSize: '1rem !important'}} className="md-font-light">{moment(this.props.data.timestamp).fromNow()}</div>
+                </Cell>
+                <Cell size={12} align={'top'} style={{fontSize: '1.2rem', fontWeight: '400'}}><Twemoji text={this.props.data.message} /></Cell>
             </Grid>
         );
         return(
@@ -45,6 +48,7 @@ class Message extends Component{
                     <Avatar style={{float: 'left', border: 'none', width: '52px', height: '52px', borderRadius: '10%'}} src={'https://avatars.dicebear.com/v2/avataaars/'+this.props.data.user.id+'.svg'} />
                     <Item />
                 </Cell>
+                <div style={{marginTop: '0', width: '100%', marginTop: '20px', borderBottom: '1px solid #3f51b575', }} ></div>
             </Grid>
         );
     }

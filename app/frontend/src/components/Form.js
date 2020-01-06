@@ -6,7 +6,8 @@ import Button from 'react-md/lib/Buttons/Button';
 import TextField from 'react-md/lib/TextFields/TextField';
 import DialogContainer from 'react-md/lib/Dialogs/DialogContainer';
 
-import '../css/emoji-mart.css';
+// import '../css/emoji-mart.css';
+import 'emoji-mart/css/emoji-mart.css';
 import { Picker } from 'emoji-mart';
 
 import './socket.js';

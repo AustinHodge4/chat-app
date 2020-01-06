@@ -12,16 +12,10 @@ class TimestampMessage extends Component{
     render(){
         const gridStyle = {
             wordBreak: 'break-word',
-            paddingRight: '8px', 
         }
         const cellStyle = {
             margin: '0',
-        }
-        const nameStyle = {
-            display: 'inline',
-            marginRight: '8px',
-            letterSpacing: '0',
-            fontSize: '18px'
+            width: '100%'
         }
         
         const messageBox = {
@@ -29,14 +23,24 @@ class TimestampMessage extends Component{
             marginRight: 'initial',
             width: '100%'
         }
+        const seperator = {
+            display: 'flex',
+            alignItems: 'center',
+            textAlign: 'center',
+            fontSize: '14px',
+            // color: '#72767d'
+        }
         
         return(
             <Grid style={messageBox}>
                 <Cell style={cellStyle} size={12}>
                     <Grid style={gridStyle} noSpacing={true}>
                         <Cell align={'top'} size={12}>
-                            <div className="md-title " style={nameStyle}>{this.props.data.value}</div>
-                            <hr style={{borderColor: '#3f51b5', marginTop: '0'}} />
+                            <div style={seperator} className="md-font-light">
+                                <div style={{content: '', flex: '1',  borderBottom: '1px solid #3f51b575', marginRight: '.25em'}} ></div>
+                                {this.props.data.value}
+                                <div style={{content: '', flex: '1',  borderBottom: '1px solid #3f51b575', marginLeft: '.25em'}} ></div>
+                            </div>
                         </Cell>
                     </Grid>
                 </Cell>
