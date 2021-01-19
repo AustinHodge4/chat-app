@@ -8,3 +8,4 @@ app/app/local_settings.py
 app/db.sqlite3
 app/.coverage
 webpack-stats.json
+node_modules/
