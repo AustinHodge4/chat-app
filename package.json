@@ -18,12 +18,12 @@
     "@babel/preset-react": "^7.7.4",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-class-properties": "^6.24.1",
-    "webpack": "^4.41.3",
+    "webpack": "^5.75.0",
     "webpack-bundle-tracker": "^0.4.3",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "css-loader": "^1.0.1",
+    "css-loader": "^6.7.3",
     "emoji-mart": "^2.11.1",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
@@ -32,7 +32,7 @@
     "react-emoji-render": "^0.4.6",
     "react-md": "^1.13.0",
     "react-resize-detector": "^3.4.0",
-    "style-loader": "^0.23.1"
+    "style-loader": "^3.3.1"
   },
   "engines": {
     "npm": "5.5.1",
